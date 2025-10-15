@@ -474,8 +474,6 @@ For detailed API documentation, visit:
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/coretrekas/vipps/issues)
-- **Documentation**: [Vipps Developer Portal](https://developer.vippsmobilepay.com/)
-- **Email**: developer@vipps.no
 
 ## Contributing
 
