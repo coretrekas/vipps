@@ -1,22 +1,23 @@
 # Vipps MobilePay PHP SDK
 
-[![Latest Version](https://img.shields.io/packagist/v/coretrekas/vipps.svg)](https://packagist.org/packages/coretrekas/vipps)
-[![PHP Version](https://img.shields.io/packagist/php-v/coretrekas/vipps.svg)](https://packagist.org/packages/coretrekas/vipps)
-[![License](https://img.shields.io/packagist/l/coretrekas/vipps.svg)](https://packagist.org/packages/coretrekas/vipps)
+[![Latest Version](https://img.shields.io/packagist/v/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
+[![PHP Version](https://img.shields.io/packagist/php-v/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
+[![License](https://img.shields.io/packagist/l/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
 
 A comprehensive, production-ready PHP SDK for Vipps MobilePay APIs, providing easy integration with:
 - **Checkout API v3** - Complete checkout sessions for payments and subscriptions
 - **Recurring Payments API v3** - Recurring payment agreements and charges
+- **Login API v1** - OAuth 2.0 / OpenID Connect authentication
 
 ## Features
 
-- ✅ **Full API Coverage** - Complete support for Checkout API v3 and Recurring Payments API v3
+- ✅ **Full API Coverage** - Complete support for Checkout API v3, Recurring Payments API v3, and Login API v1
 - ✅ **Automatic Token Management** - Access tokens cached and refreshed automatically
-- ✅ **Fluent Builders** - Easy-to-use builder interfaces for sessions and agreements
+- ✅ **Fluent Builders** - Easy-to-use builder interfaces for sessions, agreements, and authorization URLs
 - ✅ **Type-Safe** - PHP 8.1+ with strict types and full type hints
 - ✅ **Error Handling** - Comprehensive exception handling with detailed error information
 - ✅ **PSR Compliant** - PSR-3 (Logger), PSR-4 (Autoloading), PSR-12 (Code Style), PSR-18 (HTTP Client)
-- ✅ **Well Tested** - 58 unit tests with 130 assertions, 100% pass rate
+- ✅ **Well Tested** - 89 unit tests with 187 assertions, 100% pass rate
 - ✅ **Code Quality** - PHPStan level 5, Laravel Pint for code style
 - ✅ **Environment Support** - Separate test and production configurations
 - ✅ **Production Ready** - Comprehensive documentation and examples
@@ -42,15 +43,18 @@ The SDK is organized under the `Coretrek\Vipps` namespace:
 
 ```
 Coretrek\Vipps\
-├── VippsClient              # Main SDK client
+├── VippsClient                  # Main SDK client
 ├── Checkout\
-│   ├── CheckoutApi          # Checkout API methods
-│   └── SessionBuilder       # Fluent builder for sessions
+│   ├── CheckoutApi              # Checkout API methods
+│   └── SessionBuilder           # Fluent builder for sessions
 ├── Recurring\
-│   ├── RecurringApi         # Recurring API methods
-│   └── AgreementBuilder     # Fluent builder for agreements
+│   ├── RecurringApi             # Recurring API methods
+│   └── AgreementBuilder         # Fluent builder for agreements
+├── Login\
+│   ├── LoginApi                 # Login API methods
+│   └── AuthorizationUrlBuilder  # Fluent builder for OAuth URLs
 └── Exceptions\
-    └── VippsException       # Exception handling
+    └── VippsException           # Exception handling
 ```
 
 All classes use the `Coretrek\Vipps` namespace prefix.
@@ -418,6 +422,119 @@ $charges = [
 $result = $client->recurring()->createChargesAsync($charges);
 ```
 
+## Login API Examples
+
+### OAuth 2.0 / OpenID Connect Flow
+
+```php
+use Coretrek\Vipps\Login\AuthorizationUrlBuilder;
+
+// Generate secure random values
+$state = AuthorizationUrlBuilder::generateState();
+$nonce = AuthorizationUrlBuilder::generateNonce();
+$codeVerifier = AuthorizationUrlBuilder::generateCodeVerifier();
+
+// Build authorization URL
+$authUrl = $client->login()
+    ->buildAuthorizationUrl()
+    ->clientId('your-client-id')
+    ->redirectUri('https://example.com/vipps/callback')
+    ->scope(['openid', 'name', 'email', 'phoneNumber', 'address'])
+    ->state($state)
+    ->nonce($nonce)
+    ->pkce($codeVerifier, 'S256')
+    ->build();
+
+// Store state, nonce, and code_verifier in session
+$_SESSION['oauth_state'] = $state;
+$_SESSION['oauth_nonce'] = $nonce;
+$_SESSION['oauth_code_verifier'] = $codeVerifier;
+
+// Redirect user to Vipps login
+header('Location: ' . $authUrl);
+```
+
+### Handle OAuth Callback
+
+```php
+// In your callback handler
+$code = $_GET['code'];
+$returnedState = $_GET['state'];
+
+// Verify state to prevent CSRF
+if ($returnedState !== $_SESSION['oauth_state']) {
+    throw new Exception('Invalid state');
+}
+
+// Exchange code for tokens
+$tokens = $client->login()->exchangeCodeForTokens(
+    code: $code,
+    redirectUri: 'https://example.com/vipps/callback',
+    options: [
+        'code_verifier' => $_SESSION['oauth_code_verifier'],
+    ]
+);
+
+// Get user information
+$userInfo = $client->login()->getUserInfo($tokens['access_token']);
+
+echo "Welcome, " . $userInfo['name'];
+echo "Email: " . $userInfo['email'];
+echo "Phone: " . $userInfo['phone_number'];
+```
+
+### CIBA Flow (Merchant-Initiated Login)
+
+```php
+// Check if user exists
+$userExists = $client->login()->checkUserExists('4712345678');
+
+if ($userExists['exists']) {
+    // Initiate authentication
+    $auth = $client->login()->initiateCibaAuth(
+        loginHint: '4712345678',
+        options: [
+            'scope' => 'openid name email',
+            'bindingMessage' => 'Login to Example App',
+            'requested_expiry' => 300,
+        ]
+    );
+
+    // Poll for token (with proper interval)
+    $interval = $auth['interval'];
+    $authReqId = $auth['auth_req_id'];
+
+    while (true) {
+        sleep($interval);
+
+        try {
+            $tokens = $client->login()->pollCibaToken($authReqId);
+            // User has authenticated
+            break;
+        } catch (VippsException $e) {
+            // Still waiting for user to approve
+            continue;
+        }
+    }
+
+    $userInfo = $client->login()->getUserInfo($tokens['access_token']);
+}
+```
+
+### Get OpenID Configuration
+
+```php
+// Get OpenID Connect discovery document
+$config = $client->login()->getOpenIdConfiguration();
+
+echo "Issuer: " . $config['issuer'];
+echo "Authorization Endpoint: " . $config['authorization_endpoint'];
+echo "Supported Scopes: " . implode(', ', $config['scopes_supported']);
+
+// Get JWKS for token verification
+$jwks = $client->login()->getJwks();
+```
+
 ## Testing
 
 ### Running Tests
@@ -470,10 +587,11 @@ composer test:integration
 For detailed API documentation, visit:
 - [Checkout API Guide](https://developer.vippsmobilepay.com/docs/APIs/checkout-api/)
 - [Recurring API Guide](https://developer.vippsmobilepay.com/docs/APIs/recurring-api/)
+- [Login API Guide](https://developer.vippsmobilepay.com/docs/APIs/login-api/)
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/coretrekas/vipps/issues)
+- **Issues**: [GitHub Issues](https://github.com/coretrek/vipps/issues)
 
 ## Contributing
 

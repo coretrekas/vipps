@@ -6,6 +6,7 @@ namespace Coretrek\Vipps;
 
 use Coretrek\Vipps\Checkout\CheckoutApi;
 use Coretrek\Vipps\Exceptions\VippsException;
+use Coretrek\Vipps\Login\LoginApi;
 use Coretrek\Vipps\Recurring\RecurringApi;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\GuzzleException;
@@ -227,5 +228,13 @@ class VippsClient
     public function isTestMode(): bool
     {
         return $this->testMode;
+    }
+
+    /**
+     * Get Login API instance
+     */
+    public function login(): LoginApi
+    {
+        return new LoginApi($this);
     }
 }

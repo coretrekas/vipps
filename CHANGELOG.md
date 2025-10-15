@@ -41,10 +41,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Helper methods for common operations
 - Builder pattern for complex requests
 
+## [1.1.0] - 2025-10-15
+
+### Added
+- Full support for Login API v1 (OAuth 2.0 / OpenID Connect)
+  - Authorization URL builder with fluent interface
+  - Token exchange (authorization code flow)
+  - User information retrieval
+  - CIBA (Client Initiated Backchannel Authentication) support
+  - User existence check
+  - OpenID Connect discovery
+  - JWKS (JSON Web Key Set) retrieval
+  - PKCE (Proof Key for Code Exchange) support
+  - State and nonce generation helpers
+  - Code verifier generation
+- 31 new unit tests for Login API (100% pass rate)
+- Complete Login API documentation in README
+- Login flow example with OAuth and CIBA flows
+- Replaced PHP_CodeSniffer with Laravel Pint for code quality
+- Updated namespace from `Coretrekas\Vipps` to `Coretrek\Vipps`
+
+### Changed
+- Updated test count: 89 tests with 187 assertions
+- Improved code style with Laravel Pint (PSR-12 compliant)
+- Enhanced README with Login API examples and documentation
+- Updated package badges and links
+
+### Fixed
+- Code style issues across all files
+- Import ordering (alphabetically sorted)
+
 ## [Unreleased]
 
 ### Planned
-- Support for additional Vipps MobilePay APIs
 - Webhook signature verification helpers
 - More comprehensive examples
 - Performance optimizations

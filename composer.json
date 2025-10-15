@@ -1,8 +1,8 @@
 {
     "name": "coretrekas/vipps",
-    "description": "PHP SDK for Vipps MobilePay Checkout and Recurring APIs",
+    "description": "PHP SDK for Vipps MobilePay APIs",
     "type": "library",
-    "keywords": ["coretrek", "vipps", "mobilepay", "payment", "checkout", "recurring", "subscription", "sdk"],
+    "keywords": ["coretrek", "vipps", "mobilepay", "payment", "login", "oauth", "checkout", "recurring", "subscription", "sdk"],
     "license": "MIT",
     "authors": [
         {
