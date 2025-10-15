@@ -1,0 +1,2848 @@
+openapi: 3.0.1
+info:
+  title: checkout-backend-merchant-v3.API
+  description: >-
+    See the [Checkout API
+    Guide](https://developer.vippsmobilepay.com/docs/APIs/checkout-api/).
+  version: v3
+servers:
+  - url: https://apitest.vipps.no
+  - url: https://api.vipps.no
+paths:
+  /checkout/v3/session:
+    post:
+      tags:
+        - Session
+      summary: Create a Checkout session
+      parameters:
+        - $ref: '#/components/parameters/Vipps-System-Name'
+        - $ref: '#/components/parameters/Vipps-System-Version'
+        - $ref: '#/components/parameters/Vipps-System-Plugin-Name'
+        - $ref: '#/components/parameters/Vipps-System-Plugin-Version'
+        - $ref: '#/components/parameters/client_id'
+        - $ref: '#/components/parameters/client_secret'
+        - $ref: '#/components/parameters/Ocp-Apim-Subscription-Key'
+        - $ref: '#/components/parameters/Merchant-Serial-Number'
+        - $ref: '#/components/parameters/Idempotency-Key'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/InitiatePaymentSessionRequest'
+                - $ref: '#/components/schemas/InitiateSubscriptionSessionRequest'
+            examples:
+              Payment Postman:
+                summary: Payment Postman
+                value:
+                  type: PAYMENT
+                  reference: '{{orderId}}'
+                  transaction:
+                    amount:
+                      value: 1000
+                      currency: '{{currency}}'
+                    reference: '{{orderId}}'
+                    paymentDescription: '{{transactionTextInitiate}}'
+                  logistics:
+                    dynamicOptionsCallback: '{{dynamicOptionsCallbackUrl}}'
+                    fixedOptions:
+                      - brand: POSTEN
+                        amount:
+                          value: 300
+                          currency: '{{currency}}'
+                        id: postenservicepakke1
+                        priority: 1
+                        isDefault: true
+                        description: Your package is delivered to your home.
+                      - brand: POSTEN
+                        amount:
+                          value: 300
+                          currency: '{{currency}}'
+                        type: PICKUP_POINT
+                        id: postenservicepakke2
+                        priority: 2
+                        isDefault: false
+                        description: Pick up your package at the local store.
+                    integrations:
+                      porterbuddy:
+                        publicToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1Ni '
+                        apiKey: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1Ni '
+                        origin:
+                          name: '{{firstName}} {{lastName}}'
+                          email: '{{email}}'
+                          phoneNumber: '{{internationalMobileNumber}}'
+                          address:
+                            streetAddress: '{{streetAddress}}'
+                            postalCode: '{{postalCode}}'
+                            city: '{{city}}'
+                            country: '{{country}}'
+                  prefillCustomer:
+                    firstName: '{{firstName}}'
+                    lastName: '{{lastName}}'
+                    email: '{{email}}'
+                    phoneNumber: '{{internationalMobileNumber}}'
+                    streetAddress: '{{streetAddress}}'
+                    city: '{{city}}'
+                    postalCode: '{{postalCode}}'
+                    country: '{{country}}'
+                  merchantInfo:
+                    callbackUrl: '{{callbackUrl}}'
+                    returnUrl: '{{fallBack}}'
+                    callbackAuthorizationToken: '{{$guid}}'
+                    termsAndConditionsUrl: '{{termsAndConditionsUrl}}'
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+              Payment Swagger:
+                summary: Payment Swagger
+                value:
+                  type: PAYMENT
+                  reference: store-order-123
+                  transaction:
+                    amount:
+                      value: 2000
+                      currency: NOK
+                    reference: store-order-123
+                    paymentDescription: One pair of socks
+                  logistics:
+                    dynamicOptionsCallback: https://example.com/vipps/dynamiclogisticsoption
+                    fixedOptions:
+                      - brand: POSTEN
+                        amount:
+                          value: 5000
+                          currency: NOK
+                        id: postenservicepakke1
+                        priority: 1
+                        isDefault: true
+                        description: Your package is delivered to your home.
+                      - brand: POSTEN
+                        amount:
+                          value: 300
+                          currency: NOK
+                        type: PICKUP_POINT
+                        id: postenservicepakke2
+                        priority: 2
+                        isDefault: false
+                        description: Pick up your package at the local store.
+                  prefillCustomer:
+                    firstName: Ola
+                    lastName: Nordmann
+                    email: ola.nordmann@vipps.no
+                    phoneNumber: '+4748644347'
+                    streetAddress: Robert Levins gate 5
+                    city: Oslo
+                    postalCode: '0150'
+                    country: 'NO'
+                  merchantInfo:
+                    callbackUrl: https://example.com/vipps/payment-callback
+                    returnUrl: >-
+                      https://example.com/vipps/fallback-result-page-for-both-success-and-failure/acme-shop-123-order123abc
+                    callbackAuthorizationToken: c172ad8d-9499-41d4-b8ff-c689be6455e9
+                    termsAndConditionsUrl: https://example.com/vipps/terms-and-conditions
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+              Subscription Postman:
+                summary: Subscription Postman
+                value:
+                  type: SUBSCRIPTION
+                  reference: '{{orderId}}'
+                  transaction:
+                    amount:
+                      value: 1000
+                      currency: '{{currency}}'
+                    reference: '{{orderId}}'
+                    paymentDescription: '{{initialChargeDescription}}'
+                  subscription:
+                    productName: '{{transactionTextInitiate}}'
+                    amount:
+                      value: 1000
+                      currency: '{{currency}}'
+                    interval:
+                      unit: MONTH
+                      count: 1
+                    merchantAgreementUrl: '{{termsAndConditionsUrl}}'
+                    productDescription: '{{transactionTextInitiate}}'
+                    campaign:
+                      type: PERIOD_CAMPAIGN
+                      period:
+                        unit: WEEK
+                        count: 1
+                      price: 100
+                  prefillCustomer:
+                    firstName: '{{firstName}}'
+                    lastName: '{{lastName}}'
+                    email: '{{email}}'
+                    phoneNumber: '{{internationalMobileNumber}}'
+                    streetAddress: '{{streetAddress}}'
+                    city: '{{city}}'
+                    postalCode: '{{postalCode}}'
+                    country: '{{country}}'
+                  merchantInfo:
+                    callbackUrl: '{{callbackUrl}}'
+                    returnUrl: '{{fallBack}}'
+                    callbackAuthorizationToken: '{{$guid}}'
+                    termsAndConditionsUrl: '{{termsAndConditionsUrl}}'
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+              Subscription Swagger:
+                summary: Subscription Swagger
+                value:
+                  type: SUBSCRIPTION
+                  reference: store-order-123
+                  transaction:
+                    amount:
+                      value: 1
+                      currency: NOK
+                    reference: store-order-123
+                    paymentDescription: Sock subscription Initial charge
+                  subscription:
+                    productName: Sock subscription
+                    amount:
+                      value: 2000
+                      currency: NOK
+                    interval:
+                      unit: MONTH
+                      count: 1
+                    merchantAgreementUrl: https://example.com/vipps/socksubscription/terms
+                    productDescription: One pair of socks every month
+                    campaign:
+                      type: PERIOD_CAMPAIGN
+                      period:
+                        unit: MONTH
+                        count: 1
+                      price: 100
+                  prefillCustomer:
+                    firstName: Ola
+                    lastName: Nordmann
+                    email: ola.nordmann@vipps.no
+                    phoneNumber: '+4748644347'
+                    streetAddress: Robert Levins gate 5
+                    city: Oslo
+                    postalCode: '0150'
+                    country: 'NO'
+                  merchantInfo:
+                    callbackUrl: https://example.com/vipps/payment-callback
+                    returnUrl: >-
+                      https://example.com/vipps/fallback-result-page-for-both-success-and-failure/acme-shop-123-order123abc
+                    callbackAuthorizationToken: c172ad8d-9499-41d4-b8ff-c689be6455e9
+                    termsAndConditionsUrl: https://example.com/vipps/terms-and-conditions
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+          text/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/InitiatePaymentSessionRequest'
+                - $ref: '#/components/schemas/InitiateSubscriptionSessionRequest'
+            examples:
+              Payment Postman:
+                summary: Payment Postman
+                value:
+                  type: PAYMENT
+                  reference: '{{orderId}}'
+                  transaction:
+                    amount:
+                      value: 1000
+                      currency: '{{currency}}'
+                    reference: '{{orderId}}'
+                    paymentDescription: '{{transactionTextInitiate}}'
+                  logistics:
+                    dynamicOptionsCallback: '{{dynamicOptionsCallbackUrl}}'
+                    fixedOptions:
+                      - brand: POSTEN
+                        amount:
+                          value: 300
+                          currency: '{{currency}}'
+                        id: postenservicepakke1
+                        priority: 1
+                        isDefault: true
+                        description: Your package is delivered to your home.
+                      - brand: POSTEN
+                        amount:
+                          value: 300
+                          currency: '{{currency}}'
+                        type: PICKUP_POINT
+                        id: postenservicepakke2
+                        priority: 2
+                        isDefault: false
+                        description: Pick up your package at the local store.
+                    integrations:
+                      porterbuddy:
+                        publicToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1Ni '
+                        apiKey: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1Ni '
+                        origin:
+                          name: '{{firstName}} {{lastName}}'
+                          email: '{{email}}'
+                          phoneNumber: '{{internationalMobileNumber}}'
+                          address:
+                            streetAddress: '{{streetAddress}}'
+                            postalCode: '{{postalCode}}'
+                            city: '{{city}}'
+                            country: '{{country}}'
+                  prefillCustomer:
+                    firstName: '{{firstName}}'
+                    lastName: '{{lastName}}'
+                    email: '{{email}}'
+                    phoneNumber: '{{internationalMobileNumber}}'
+                    streetAddress: '{{streetAddress}}'
+                    city: '{{city}}'
+                    postalCode: '{{postalCode}}'
+                    country: '{{country}}'
+                  merchantInfo:
+                    callbackUrl: '{{callbackUrl}}'
+                    returnUrl: '{{fallBack}}'
+                    callbackAuthorizationToken: '{{$guid}}'
+                    termsAndConditionsUrl: '{{termsAndConditionsUrl}}'
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+              Payment Swagger:
+                summary: Payment Swagger
+                value:
+                  type: PAYMENT
+                  reference: store-order-123
+                  transaction:
+                    amount:
+                      value: 2000
+                      currency: NOK
+                    reference: store-order-123
+                    paymentDescription: One pair of socks
+                  logistics:
+                    dynamicOptionsCallback: https://example.com/vipps/dynamiclogisticsoption
+                    fixedOptions:
+                      - brand: POSTEN
+                        amount:
+                          value: 5000
+                          currency: NOK
+                        id: postenservicepakke1
+                        priority: 1
+                        isDefault: true
+                        description: Your package is delivered to your home.
+                      - brand: POSTEN
+                        amount:
+                          value: 300
+                          currency: NOK
+                        type: PICKUP_POINT
+                        id: postenservicepakke2
+                        priority: 2
+                        isDefault: false
+                        description: Pick up your package at the local store.
+                  prefillCustomer:
+                    firstName: Ola
+                    lastName: Nordmann
+                    email: ola.nordmann@vipps.no
+                    phoneNumber: '+4748644347'
+                    streetAddress: Robert Levins gate 5
+                    city: Oslo
+                    postalCode: '0150'
+                    country: 'NO'
+                  merchantInfo:
+                    callbackUrl: https://example.com/vipps/payment-callback
+                    returnUrl: >-
+                      https://example.com/vipps/fallback-result-page-for-both-success-and-failure/acme-shop-123-order123abc
+                    callbackAuthorizationToken: c172ad8d-9499-41d4-b8ff-c689be6455e9
+                    termsAndConditionsUrl: https://example.com/vipps/terms-and-conditions
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+              Subscription Postman:
+                summary: Subscription Postman
+                value:
+                  type: SUBSCRIPTION
+                  reference: '{{orderId}}'
+                  transaction:
+                    amount:
+                      value: 1000
+                      currency: '{{currency}}'
+                    reference: '{{orderId}}'
+                    paymentDescription: '{{initialChargeDescription}}'
+                  subscription:
+                    productName: '{{transactionTextInitiate}}'
+                    amount:
+                      value: 1000
+                      currency: '{{currency}}'
+                    interval:
+                      unit: MONTH
+                      count: 1
+                    merchantAgreementUrl: '{{termsAndConditionsUrl}}'
+                    productDescription: '{{transactionTextInitiate}}'
+                    campaign:
+                      type: PERIOD_CAMPAIGN
+                      period:
+                        unit: WEEK
+                        count: 1
+                      price: 100
+                  prefillCustomer:
+                    firstName: '{{firstName}}'
+                    lastName: '{{lastName}}'
+                    email: '{{email}}'
+                    phoneNumber: '{{internationalMobileNumber}}'
+                    streetAddress: '{{streetAddress}}'
+                    city: '{{city}}'
+                    postalCode: '{{postalCode}}'
+                    country: '{{country}}'
+                  merchantInfo:
+                    callbackUrl: '{{callbackUrl}}'
+                    returnUrl: '{{fallBack}}'
+                    callbackAuthorizationToken: '{{$guid}}'
+                    termsAndConditionsUrl: '{{termsAndConditionsUrl}}'
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+              Subscription Swagger:
+                summary: Subscription Swagger
+                value:
+                  type: SUBSCRIPTION
+                  reference: store-order-123
+                  transaction:
+                    amount:
+                      value: 1
+                      currency: NOK
+                    reference: store-order-123
+                    paymentDescription: Sock subscription Initial charge
+                  subscription:
+                    productName: Sock subscription
+                    amount:
+                      value: 2000
+                      currency: NOK
+                    interval:
+                      unit: MONTH
+                      count: 1
+                    merchantAgreementUrl: https://example.com/vipps/socksubscription/terms
+                    productDescription: One pair of socks every month
+                    campaign:
+                      type: PERIOD_CAMPAIGN
+                      period:
+                        unit: MONTH
+                        count: 1
+                      price: 100
+                  prefillCustomer:
+                    firstName: Ola
+                    lastName: Nordmann
+                    email: ola.nordmann@vipps.no
+                    phoneNumber: '+4748644347'
+                    streetAddress: Robert Levins gate 5
+                    city: Oslo
+                    postalCode: '0150'
+                    country: 'NO'
+                  merchantInfo:
+                    callbackUrl: https://example.com/vipps/payment-callback
+                    returnUrl: >-
+                      https://example.com/vipps/fallback-result-page-for-both-success-and-failure/acme-shop-123-order123abc
+                    callbackAuthorizationToken: c172ad8d-9499-41d4-b8ff-c689be6455e9
+                    termsAndConditionsUrl: https://example.com/vipps/terms-and-conditions
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+          application/*+json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/InitiatePaymentSessionRequest'
+                - $ref: '#/components/schemas/InitiateSubscriptionSessionRequest'
+            examples:
+              Payment Postman:
+                summary: Payment Postman
+                value:
+                  type: PAYMENT
+                  reference: '{{orderId}}'
+                  transaction:
+                    amount:
+                      value: 1000
+                      currency: '{{currency}}'
+                    reference: '{{orderId}}'
+                    paymentDescription: '{{transactionTextInitiate}}'
+                  logistics:
+                    dynamicOptionsCallback: '{{dynamicOptionsCallbackUrl}}'
+                    fixedOptions:
+                      - brand: POSTEN
+                        amount:
+                          value: 300
+                          currency: '{{currency}}'
+                        id: postenservicepakke1
+                        priority: 1
+                        isDefault: true
+                        description: Your package is delivered to your home.
+                      - brand: POSTEN
+                        amount:
+                          value: 300
+                          currency: '{{currency}}'
+                        type: PICKUP_POINT
+                        id: postenservicepakke2
+                        priority: 2
+                        isDefault: false
+                        description: Pick up your package at the local store.
+                    integrations:
+                      porterbuddy:
+                        publicToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1Ni '
+                        apiKey: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1Ni '
+                        origin:
+                          name: '{{firstName}} {{lastName}}'
+                          email: '{{email}}'
+                          phoneNumber: '{{internationalMobileNumber}}'
+                          address:
+                            streetAddress: '{{streetAddress}}'
+                            postalCode: '{{postalCode}}'
+                            city: '{{city}}'
+                            country: '{{country}}'
+                  prefillCustomer:
+                    firstName: '{{firstName}}'
+                    lastName: '{{lastName}}'
+                    email: '{{email}}'
+                    phoneNumber: '{{internationalMobileNumber}}'
+                    streetAddress: '{{streetAddress}}'
+                    city: '{{city}}'
+                    postalCode: '{{postalCode}}'
+                    country: '{{country}}'
+                  merchantInfo:
+                    callbackUrl: '{{callbackUrl}}'
+                    returnUrl: '{{fallBack}}'
+                    callbackAuthorizationToken: '{{$guid}}'
+                    termsAndConditionsUrl: '{{termsAndConditionsUrl}}'
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+              Payment Swagger:
+                summary: Payment Swagger
+                value:
+                  type: PAYMENT
+                  reference: store-order-123
+                  transaction:
+                    amount:
+                      value: 2000
+                      currency: NOK
+                    reference: store-order-123
+                    paymentDescription: One pair of socks
+                  logistics:
+                    dynamicOptionsCallback: https://example.com/vipps/dynamiclogisticsoption
+                    fixedOptions:
+                      - brand: POSTEN
+                        amount:
+                          value: 5000
+                          currency: NOK
+                        id: postenservicepakke1
+                        priority: 1
+                        isDefault: true
+                        description: Your package is delivered to your home.
+                      - brand: POSTEN
+                        amount:
+                          value: 300
+                          currency: NOK
+                        type: PICKUP_POINT
+                        id: postenservicepakke2
+                        priority: 2
+                        isDefault: false
+                        description: Pick up your package at the local store.
+                  prefillCustomer:
+                    firstName: Ola
+                    lastName: Nordmann
+                    email: ola.nordmann@vipps.no
+                    phoneNumber: '+4748644347'
+                    streetAddress: Robert Levins gate 5
+                    city: Oslo
+                    postalCode: '0150'
+                    country: 'NO'
+                  merchantInfo:
+                    callbackUrl: https://example.com/vipps/payment-callback
+                    returnUrl: >-
+                      https://example.com/vipps/fallback-result-page-for-both-success-and-failure/acme-shop-123-order123abc
+                    callbackAuthorizationToken: c172ad8d-9499-41d4-b8ff-c689be6455e9
+                    termsAndConditionsUrl: https://example.com/vipps/terms-and-conditions
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+              Subscription Postman:
+                summary: Subscription Postman
+                value:
+                  type: SUBSCRIPTION
+                  reference: '{{orderId}}'
+                  transaction:
+                    amount:
+                      value: 1000
+                      currency: '{{currency}}'
+                    reference: '{{orderId}}'
+                    paymentDescription: '{{initialChargeDescription}}'
+                  subscription:
+                    productName: '{{transactionTextInitiate}}'
+                    amount:
+                      value: 1000
+                      currency: '{{currency}}'
+                    interval:
+                      unit: MONTH
+                      count: 1
+                    merchantAgreementUrl: '{{termsAndConditionsUrl}}'
+                    productDescription: '{{transactionTextInitiate}}'
+                    campaign:
+                      type: PERIOD_CAMPAIGN
+                      period:
+                        unit: WEEK
+                        count: 1
+                      price: 100
+                  prefillCustomer:
+                    firstName: '{{firstName}}'
+                    lastName: '{{lastName}}'
+                    email: '{{email}}'
+                    phoneNumber: '{{internationalMobileNumber}}'
+                    streetAddress: '{{streetAddress}}'
+                    city: '{{city}}'
+                    postalCode: '{{postalCode}}'
+                    country: '{{country}}'
+                  merchantInfo:
+                    callbackUrl: '{{callbackUrl}}'
+                    returnUrl: '{{fallBack}}'
+                    callbackAuthorizationToken: '{{$guid}}'
+                    termsAndConditionsUrl: '{{termsAndConditionsUrl}}'
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+              Subscription Swagger:
+                summary: Subscription Swagger
+                value:
+                  type: SUBSCRIPTION
+                  reference: store-order-123
+                  transaction:
+                    amount:
+                      value: 1
+                      currency: NOK
+                    reference: store-order-123
+                    paymentDescription: Sock subscription Initial charge
+                  subscription:
+                    productName: Sock subscription
+                    amount:
+                      value: 2000
+                      currency: NOK
+                    interval:
+                      unit: MONTH
+                      count: 1
+                    merchantAgreementUrl: https://example.com/vipps/socksubscription/terms
+                    productDescription: One pair of socks every month
+                    campaign:
+                      type: PERIOD_CAMPAIGN
+                      period:
+                        unit: MONTH
+                        count: 1
+                      price: 100
+                  prefillCustomer:
+                    firstName: Ola
+                    lastName: Nordmann
+                    email: ola.nordmann@vipps.no
+                    phoneNumber: '+4748644347'
+                    streetAddress: Robert Levins gate 5
+                    city: Oslo
+                    postalCode: '0150'
+                    country: 'NO'
+                  merchantInfo:
+                    callbackUrl: https://example.com/vipps/payment-callback
+                    returnUrl: >-
+                      https://example.com/vipps/fallback-result-page-for-both-success-and-failure/acme-shop-123-order123abc
+                    callbackAuthorizationToken: c172ad8d-9499-41d4-b8ff-c689be6455e9
+                    termsAndConditionsUrl: https://example.com/vipps/terms-and-conditions
+                  configuration:
+                    customerInteraction: CUSTOMER_NOT_PRESENT
+                    elements: Full
+                    countries:
+                      supported:
+                        - 'NO'
+                        - SE
+                        - DK
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiateSessionResponse'
+        '400':
+          description: 'BadRequest: Validation errors'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '401':
+          description: 'Unauthorized: Invalid credentials'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '403':
+          description: 'Forbidden: Invalid subscription or configuration'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '409':
+          description: Conflict. Duplicate reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '500':
+          description: 'InternalServerError: Unexpected errors'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '502':
+          description: 'BadGateway: Unexpected errors in integrations'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+      callbacks:
+        Dynamic logistics:
+          '{$request.body#/logistics/dynamicOptionsCallback}':
+            post:
+              summary: Callback for dynamic merchant logistics options
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: >-
+                        #/components/schemas/MerchantLogisticsCallbackRequestBody
+              responses:
+                '200':
+                  description: >-
+                    Your server implementation should return this HTTP status
+                    code if the data was received successfully.
+                  content:
+                    application/json:
+                      schema:
+                        type: array
+                        items:
+                          oneOf:
+                            - $ref: '#/components/schemas/PostenLogisticsOption'
+                            - $ref: '#/components/schemas/BringLogisticsOption'
+                            - $ref: '#/components/schemas/PostnordLogisticsOption'
+                            - $ref: '#/components/schemas/PorterbuddyLogisticsOption'
+                            - $ref: '#/components/schemas/HelthjemLogisticsOption'
+                            - $ref: '#/components/schemas/PostiLogisticsOption'
+                            - $ref: '#/components/schemas/GlsLogisticsOption'
+                            - $ref: '#/components/schemas/DaoLogisticsOption'
+                            - $ref: '#/components/schemas/OtherLogisticsOption'
+                4XX:
+                  description: >-
+                    If your server returns an HTTP status code indicating it
+                    does not understand the format of the payload the delivery
+                    will be treated as a failure. 
+                5XX:
+                  description: >-
+                    If your server returns an HTTP status code indicating a
+                    server-side error the delivery will be treated as a
+                    failure. 
+        Payment completed:
+          '{$request.body#/merchantInfo/callbackUrl}':
+            post:
+              summary: Callback for session completed.
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/SessionResponse'
+              responses:
+                '200':
+                  description: >-
+                    Your server implementation should return this HTTP status
+                    code if the data was received successfully.
+                4XX:
+                  description: >-
+                    If your server returns an HTTP status code indicating it
+                    does not understand the format of the payload the delivery
+                    will be treated as a failure. 
+                5XX:
+                  description: >-
+                    If your server returns an HTTP status code indicating a
+                    server-side error the delivery will be treated as a
+                    failure. 
+  /checkout/v3/session/{reference}:
+    get:
+      tags:
+        - Session
+      summary: Get session info
+      description: >-
+        Transaction information, user information and shipping information are
+        included in the response
+
+        if the SessionState is PaymentInitiated
+      parameters:
+        - name: reference
+          in: path
+          description: 'The reference of the session. Example: "123123".'
+          required: true
+          schema:
+            type: string
+            default: '{{orderId}}'
+        - $ref: '#/components/parameters/Vipps-System-Name'
+        - $ref: '#/components/parameters/Vipps-System-Version'
+        - $ref: '#/components/parameters/Vipps-System-Plugin-Name'
+        - $ref: '#/components/parameters/Vipps-System-Plugin-Version'
+        - $ref: '#/components/parameters/client_id'
+        - $ref: '#/components/parameters/client_secret'
+        - $ref: '#/components/parameters/Ocp-Apim-Subscription-Key'
+        - $ref: '#/components/parameters/Merchant-Serial-Number'
+        - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          description: 'BadRequest: Validation errors'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '401':
+          description: 'Unauthorized: Invalid credentials'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '403':
+          description: 'Forbidden: Invalid subscription or configuration'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '404':
+          description: 'NotFound: The specified session id is unknown.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '500':
+          description: 'InternalServerError: Unexpected errors'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+        '502':
+          description: 'BadGateway: Unexpected errors in integrations'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutProblemDetails'
+    patch:
+      tags:
+        - Session
+      summary: Updates a session
+      parameters:
+        - name: reference
+          in: path
+          description: 'The reference of the session. Example: "123123".'
+          required: true
+          schema:
+            type: string
+            default: '{{orderId}}'
+        - $ref: '#/components/parameters/Vipps-System-Name'
+        - $ref: '#/components/parameters/Vipps-System-Version'
+        - $ref: '#/components/parameters/Vipps-System-Plugin-Name'
+        - $ref: '#/components/parameters/Vipps-System-Plugin-Version'
+        - $ref: '#/components/parameters/client_id'
+        - $ref: '#/components/parameters/client_secret'
+        - $ref: '#/components/parameters/Ocp-Apim-Subscription-Key'
+        - $ref: '#/components/parameters/Merchant-Serial-Number'
+        - $ref: '#/components/parameters/Idempotency-Key'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/UpdateSessionRequest'
+          text/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/UpdateSessionRequest'
+          application/*+json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/UpdateSessionRequest'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: 'BadRequest: Validation errors'
+        '401':
+          description: 'Unauthorized: Invalid credentials'
+        '403':
+          description: 'Forbidden: Invalid subscription or configuration'
+        '404':
+          description: 'NotFound: The specified session id is unknown.'
+        '500':
+          description: 'InternalServerError: Unexpected errors'
+        '502':
+          description: 'BadGateway: Unexpected errors in integrations'
+  /checkout/v3/session/{reference}/expire:
+    post:
+      tags:
+        - Session
+      summary: Expire session
+      parameters:
+        - name: reference
+          in: path
+          description: 'The reference of the session. Example: "123123".'
+          required: true
+          schema:
+            type: string
+            default: '{{orderId}}'
+        - $ref: '#/components/parameters/Vipps-System-Name'
+        - $ref: '#/components/parameters/Vipps-System-Version'
+        - $ref: '#/components/parameters/Vipps-System-Plugin-Name'
+        - $ref: '#/components/parameters/Vipps-System-Plugin-Version'
+        - $ref: '#/components/parameters/client_id'
+        - $ref: '#/components/parameters/client_secret'
+        - $ref: '#/components/parameters/Ocp-Apim-Subscription-Key'
+        - $ref: '#/components/parameters/Merchant-Serial-Number'
+        - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: 'BadRequest: Validation errors'
+        '401':
+          description: 'Unauthorized: Invalid credentials'
+        '403':
+          description: 'Forbidden: Invalid subscription or configuration'
+        '404':
+          description: 'NotFound: The specified session id is unknown.'
+        '500':
+          description: 'InternalServerError: Unexpected errors'
+        '502':
+          description: 'BadGateway: Unexpected errors in integrations'
+components:
+  schemas:
+    Amount:
+      required:
+        - currency
+        - value
+      type: object
+      properties:
+        value:
+          minimum: 0
+          type: integer
+          description: >-
+            Must be in minor units. The smallest unit of a currency. Example 100
+            NOK = 10000.
+          format: int32
+        currency:
+          type: string
+          description: 'The currency identifier according to ISO 4217. Example: "NOK"'
+      description: >-
+        Amounts are specified in minor units. For example: 10.00 NOK should be
+        written as 1000; 20.50 EUR should be written as 2050.
+    BillingDetails:
+      required:
+        - email
+        - firstName
+        - lastName
+        - phoneNumber
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: 'Example: "Ada"'
+        lastName:
+          type: string
+          description: 'Example: "Lovelace"'
+        email:
+          type: string
+          description: 'Example: "user@example.com"'
+        phoneNumber:
+          type: string
+          description: >-
+            If no country code is provided, defaults to Norway (47). Example:
+            "4712345678"
+        streetAddress:
+          type: string
+          description: 'Example: "Robert Levins gate 5"'
+          nullable: true
+        postalCode:
+          type: string
+          description: 'Example: "0154"'
+          nullable: true
+        city:
+          type: string
+          description: 'Example: "Oslo"'
+          nullable: true
+        country:
+          type: string
+          description: 'The ISO-3166-1 Alpha-2 representation of the country. Example: "NO"'
+          nullable: true
+      description: Defines the details of the billing
+    BringLogisticsOption:
+      required:
+        - amount
+        - brand
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LogisticsOptionBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: >-
+            Amounts are specified in minor units. For example: 10.00 NOK should
+            be written as 1000; 20.50 EUR should be written as 2050.
+        type:
+          allOf:
+            - $ref: '#/components/schemas/BringLogisticsType'
+          nullable: true
+        customType:
+          type: string
+          nullable: true
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: >-
+            Tax percentage, represented with 0.01 decimal points. 5000 equals
+            50% . Between 0-10000
+          format: int32
+          nullable: true
+        brand:
+          pattern: BRING
+          type: string
+          default: BRING
+    BringLogisticsType:
+      enum:
+        - MAILBOX
+        - PICKUP_POINT
+        - HOME_DELIVERY
+      type: string
+    CheckoutConfig:
+      type: object
+      properties:
+        customerInteraction:
+          allOf:
+            - $ref: '#/components/schemas/CustomerInteraction'
+          description: >-
+            If customer is physically present: "customer_present", otherwise:
+            "customer_not_present".
+          nullable: true
+        elements:
+          allOf:
+            - $ref: '#/components/schemas/Elements'
+          description: Adjust the fields and values present in the Checkout.
+          nullable: true
+        countries:
+          allOf:
+            - $ref: '#/components/schemas/Countries'
+          description: Countries to allow during session
+          nullable: true
+        userFlow:
+          allOf:
+            - $ref: '#/components/schemas/UserFlow'
+          description: >-
+            One of the following: "WEB_REDIRECT", "NATIVE_REDIRECT". To ensure
+            having a return URL based on an app URL, use "NATIVE_REDIRECT".
+          nullable: true
+        requireUserInfo:
+          type: boolean
+          description: >-
+            Requires the customer to consent to share their email and openid sub
+            with the merchant to be able to make a wallet payment (default:
+            false).
+          nullable: true
+        customConsent:
+          allOf:
+            - $ref: '#/components/schemas/CustomConsent'
+          description: >-
+            If used, displays a checkbox that can be used to ask for extra
+            consent.
+          nullable: true
+        showOrderSummary:
+          type: boolean
+          description: >-
+            Decides whether the order lines are displayed as a shopping cart
+            context in the checkout.
+          nullable: true
+        externalPaymentMethods:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalPaymentMethod'
+          description: External payment methods to be enabled in the checkout.
+          nullable: true
+      description: ''
+    CheckoutProblemDetails:
+      required:
+        - errorCode
+        - errors
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          format: int32
+          nullable: true
+        detail:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+        errorCode:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+      additionalProperties: {}
+      description: >-
+        A machine-readable format for specifying errors in HTTP API responses
+        based on <see href="https://tools.ietf.org/html/rfc7807" />.
+    Countries:
+      required:
+        - supported
+      type: object
+      properties:
+        supported:
+          type: array
+          items:
+            type: string
+          description: >-
+            List of allowed countries in ISO-3166 Alpha 2. If specified, the
+            customer will only be able to select these countries. Example ["NO",
+            "SE", "DK"]
+      description: ''
+    CustomConsent:
+      required:
+        - required
+        - text
+      type: object
+      properties:
+        text:
+          type: string
+          description: >-
+            Text displayed next to the checkbox. This text can contain up to one
+            link in markdown format like this: [linkText](https://example.com)
+        required:
+          type: boolean
+          description: Whether box has to be checked to complete the checkout.
+      description: If used, displays a checkbox that can be used to ask for extra consent.
+    CustomerInteraction:
+      enum:
+        - CUSTOMER_PRESENT
+        - CUSTOMER_NOT_PRESENT
+      type: string
+    DaoLogisticsOption:
+      required:
+        - amount
+        - brand
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LogisticsOptionBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: >-
+            Amounts are specified in minor units. For example: 10.00 NOK should
+            be written as 1000; 20.50 EUR should be written as 2050.
+        type:
+          allOf:
+            - $ref: '#/components/schemas/DaoLogisticsType'
+          nullable: true
+        customType:
+          type: string
+          nullable: true
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: >-
+            Tax percentage, represented with 0.01 decimal points. 5000 equals
+            50% . Between 0-10000
+          format: int32
+          nullable: true
+        brand:
+          pattern: DAO
+          type: string
+          default: DAO
+    DaoLogisticsType:
+      type: integer
+      format: int32
+    Delivery:
+      type: object
+      properties:
+        leadTime:
+          allOf:
+            - $ref: '#/components/schemas/LeadTime'
+          nullable: true
+        pickupPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/PickupPoint'
+          nullable: true
+        timeslots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Timeslot'
+          nullable: true
+    Elements:
+      enum:
+        - Full
+        - PaymentAndContactInfo
+        - PaymentOnly
+      type: string
+    EventSubscriptionCampaign:
+      required:
+        - eventDate
+        - eventText
+        - type
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/SubscriptionCampaign'
+      properties:
+        eventDate:
+          minLength: 1
+          type: string
+        eventText:
+          maxLength: 15
+          minLength: 1
+          type: string
+        type:
+          pattern: EVENT_CAMPAIGN
+          type: string
+          default: EVENT_CAMPAIGN
+    ExternalPaymentMethod:
+      required:
+        - paymentMethod
+        - redirectUrl
+      type: object
+      properties:
+        paymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/ExternalPaymentMethodType'
+          description: >-
+            Identifier for the payment method, needs to match that of the
+            allowed list defined in the docs
+        redirectUrl:
+          type: string
+          description: URL to redirect the customer to finish the payment
+      description: >-
+        Configuration for showing and enabling external payment methods in the
+        checkout.
+    ExternalPaymentMethodType:
+      enum:
+        - Klarna
+        - SveaCheckout
+      type: string
+      description: Valid types of external payment methods
+    ExternalSessionState:
+      enum:
+        - SessionCreated
+        - PaymentInitiated
+        - SessionExpired
+        - PaymentSuccessful
+        - PaymentTerminated
+      type: string
+    GlsLogisticsOption:
+      required:
+        - amount
+        - brand
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LogisticsOptionBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: >-
+            Amounts are specified in minor units. For example: 10.00 NOK should
+            be written as 1000; 20.50 EUR should be written as 2050.
+        type:
+          allOf:
+            - $ref: '#/components/schemas/GlsLogisticsType'
+          nullable: true
+        customType:
+          type: string
+          nullable: true
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: >-
+            Tax percentage, represented with 0.01 decimal points. 5000 equals
+            50% . Between 0-10000
+          format: int32
+          nullable: true
+        brand:
+          pattern: GLS
+          type: string
+          default: GLS
+    GlsLogisticsType:
+      enum:
+        - PICKUP_POINT
+      type: string
+    HelthjemLogisticsOption:
+      required:
+        - amount
+        - brand
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LogisticsOptionBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: >-
+            Amounts are specified in minor units. For example: 10.00 NOK should
+            be written as 1000; 20.50 EUR should be written as 2050.
+        type:
+          allOf:
+            - $ref: '#/components/schemas/HelthjemLogisticsType'
+          nullable: true
+        customType:
+          type: string
+          nullable: true
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: >-
+            Tax percentage, represented with 0.01 decimal points. 5000 equals
+            50% . Between 0-10000
+          format: int32
+          nullable: true
+        brand:
+          pattern: HELTHJEM
+          type: string
+          default: HELTHJEM
+    HelthjemLogisticsType:
+      enum:
+        - HOME_DELIVERY
+        - PICKUP_POINT
+      type: string
+    IdempotencyHeader:
+      type: object
+      properties:
+        idempotency-Key:
+          type: string
+          nullable: true
+    InitiatePaymentSessionRequest:
+      required:
+        - transaction
+        - type
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/InitiateSessionRequestBase'
+      properties:
+        reference:
+          type: string
+          description: >-
+            This is the merchant's unique reference to the Checkout Session (as
+            well as the optional payment transaction)
+          nullable: true
+        transaction:
+          allOf:
+            - $ref: '#/components/schemas/PaymentTransaction'
+          description: ''
+        logistics:
+          allOf:
+            - $ref: '#/components/schemas/Logistics'
+          description: ''
+          nullable: true
+        type:
+          pattern: PAYMENT
+          type: string
+          default: PAYMENT
+      description: Request to set up a Checkout session
+    InitiateSessionRequestBase:
+      required:
+        - merchantInfo
+      type: object
+      properties:
+        prefillCustomer:
+          allOf:
+            - $ref: '#/components/schemas/PrefillCustomer'
+          description: >-
+            Information about the customer to be prefilled
+                        
+            If any of the customer information is invalid such as the phone
+            number,
+
+            the customer will be prompted to input new user information.
+          nullable: true
+        merchantInfo:
+          allOf:
+            - $ref: '#/components/schemas/MerchantInfo'
+        configuration:
+          allOf:
+            - $ref: '#/components/schemas/CheckoutConfig'
+          description: ''
+          nullable: true
+    InitiateSessionResponse:
+      required:
+        - checkoutFrontendUrl
+        - pollingUrl
+        - token
+      type: object
+      properties:
+        token:
+          type: string
+          description: >-
+            The token to be provided to Checkout. Example:
+            "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiJUdHF1Y3I5ZDdKRHZ6clhYWTU1WUZRIiwic2Vzc2lvblBvbGxpbmdVUkwiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAvY2hlY2tvdXQvc2Vzc2lvbi9UdHF1Y3I5ZDdKRHZ6clhYWTU1WUZRIn0.ln7VzZkNvUGu0HhyA_a8IbXQN35WhDBmCYC9IvyYL-I"
+        checkoutFrontendUrl:
+          type: string
+          description: >-
+            The URL of the checkout frontend. Example:
+            "https://vippscheckout.vipps.no/v1/".
+        pollingUrl:
+          type: string
+          description: >-
+            The URL to poll for session information. Example:
+            "https://api.vipps.no/checkout/v1/session/31gf1g413121".
+      description: Response from initiating a session.
+    InitiateSubscriptionSessionRequest:
+      required:
+        - subscription
+        - type
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/InitiateSessionRequestBase'
+      properties:
+        reference:
+          type: string
+          description: >-
+            Required when no Transaction is present. This is the merchant's
+            unique reference to the Checkout Session (as well as the optional
+            payment transaction)
+          nullable: true
+        transaction:
+          allOf:
+            - $ref: '#/components/schemas/PaymentTransaction'
+          description: Defines a one-time-payment
+          nullable: true
+        subscription:
+          allOf:
+            - $ref: '#/components/schemas/Subscription'
+          description: Defines a subscription. Used for future payments.
+        type:
+          pattern: SUBSCRIPTION
+          type: string
+          default: SUBSCRIPTION
+      description: Request to set up a Recurring Checkout session
+    Integrations:
+      type: object
+      properties:
+        porterbuddy:
+          allOf:
+            - $ref: '#/components/schemas/Porterbuddy'
+          description: Configuration required to enable Porterbuddy logistics options
+          nullable: true
+          deprecated: true
+      deprecated: true
+    Interval:
+      required:
+        - count
+        - unit
+      type: object
+      properties:
+        unit:
+          allOf:
+            - $ref: '#/components/schemas/IntervalUnit'
+        count:
+          maximum: 31
+          minimum: 1
+          type: integer
+          format: int32
+    IntervalUnit:
+      enum:
+        - YEAR
+        - MONTH
+        - WEEK
+        - DAY
+      type: string
+    LeadTime:
+      required:
+        - earliest
+        - latest
+      type: object
+      properties:
+        earliest:
+          type: string
+          description: 'Earliest date for delivery. Example: 2025-03-15'
+          format: date
+        latest:
+          type: string
+          description: 'Latest date for delivery. Example: 2025-03-20'
+          format: date
+    Logistics:
+      type: object
+      properties:
+        dynamicOptionsCallback:
+          type: string
+          description: >-
+            Merchant's Callback URL for providing dynamic logistics options
+            based on customer address. Example:
+            "https://example.com/vipps/dynamiclogisticsoption". Can not be used
+            with AddressFields set to false.
+          nullable: true
+        fixedOptions:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/PostenLogisticsOption'
+              - $ref: '#/components/schemas/BringLogisticsOption'
+              - $ref: '#/components/schemas/PostnordLogisticsOption'
+              - $ref: '#/components/schemas/PorterbuddyLogisticsOption'
+              - $ref: '#/components/schemas/HelthjemLogisticsOption'
+              - $ref: '#/components/schemas/PostiLogisticsOption'
+              - $ref: '#/components/schemas/GlsLogisticsOption'
+              - $ref: '#/components/schemas/DaoLogisticsOption'
+              - $ref: '#/components/schemas/OtherLogisticsOption'
+          description: Fixed list of logistics options.
+          nullable: true
+        integrations:
+          allOf:
+            - $ref: '#/components/schemas/Integrations'
+          description: >-
+            Some optional checkout features require carrier-specific
+            configuration. Can not be used with AddressFields set to false.
+          nullable: true
+          deprecated: true
+      description: >-
+        If both dynamic and fixed options are specified, dynamic options is
+        provided to the user.
+
+        If no DynamicOptionsCallback is provided, only fixed logistics options
+        will be used.
+
+        When using dynamic shipping we recommend that you define
+        logistics.fixedOptions as a backup.
+
+        If the callback does not resolve successfully within 8 seconds, returns
+        null or an empty list the system will fall back to static options.
+
+        If no fallback options are provided, the user will be presented with an
+        error and will not be able to continue with the checkout.
+    LogisticsOptionBase:
+      required:
+        - id
+        - isDefault
+        - priority
+      type: object
+      properties:
+        id:
+          maxLength: 200
+          minLength: 1
+          type: string
+        priority:
+          minimum: 0
+          type: integer
+          description: >-
+            Priority of the option. The lower the number, the higher the
+            priority. 0 is the highest priority.
+          format: int32
+        isDefault:
+          type: boolean
+          description: >-
+            Whether the option is default or not. Default option is the one that
+            is selected by default when the user opens the checkout page.
+        description:
+          type: string
+          description: >-
+            Description of the option. This is shown to the user in the checkout
+            page.
+          nullable: true
+        delivery:
+          allOf:
+            - $ref: '#/components/schemas/Delivery'
+          description: Delivery Details.
+          nullable: true
+        title:
+          maxLength: 200
+          minLength: 1
+          type: string
+          description: >-
+            The title of the option. This is shown to the user in the checkout
+            page.
+          nullable: true
+    MerchantAuthInfoHeaders:
+      required:
+        - client_id
+        - client_secret
+        - merchant-Serial-Number
+        - ocp-Apim-Subscription-Key
+      type: object
+      properties:
+        client_id:
+          minLength: 1
+          type: string
+          description: >-
+            Client ID for the merchant (the "username"). See [API
+            keys](/docs/knowledge-base/api-keys/).
+        client_secret:
+          minLength: 1
+          type: string
+          description: >-
+            Client Secret for the merchant (the "password"). See [API
+            keys](/docs/knowledge-base/api-keys/).
+        ocp-Apim-Subscription-Key:
+          minLength: 1
+          type: string
+          description: >-
+            Subscription key for the API product. See [API
+            keys](/docs/knowledge-base/api-keys/).
+        merchant-Serial-Number:
+          maxLength: 7
+          minLength: 5
+          type: string
+          description: >-
+            Assigned unique number for a merchant. See [API
+            keys](/docs/knowledge-base/api-keys/).
+      description: Headers required to retrieve an access token.
+    MerchantInfo:
+      required:
+        - callbackAuthorizationToken
+        - callbackUrl
+        - returnUrl
+      type: object
+      properties:
+        callbackUrl:
+          type: string
+          description: >-
+            Complete URL for receiving callback after payment is completed.
+            Example: "https://exmaple.com/vipps/payment-callback/oS1d5f9abD
+        returnUrl:
+          minLength: 1
+          type: string
+          description: >-
+            Complete URL for redirecting customers to when the checkout is
+            finished. Example: "https://example.com/vipps".
+        callbackAuthorizationToken:
+          type: string
+          description: >-
+            The token will be supplied by the callback to the merchant as a
+            header. Example:
+            "iOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImllX3FXQ1hoWHh0MXpJ".
+        termsAndConditionsUrl:
+          type: string
+          description: >-
+            Complete URL to the merchant's terms and conditions. Example:
+            "https://example.com/vipps/termsAndConditions".
+          nullable: true
+    MerchantLogisticsCallbackRequestBody:
+      required:
+        - country
+        - postalCode
+        - region
+        - streetAddress
+      type: object
+      properties:
+        streetAddress:
+          type: string
+          description: 'Example: "Robert Levins gate 5"'
+        postalCode:
+          type: string
+          description: 'Example: "0154"'
+        region:
+          type: string
+          description: 'Example: "Oslo"'
+        country:
+          type: string
+          description: 'The ISO-3166-1 Alpha-2 representation of the country. Example: "NO"'
+      description: >-
+        Information about the customer address used when retrieving dynamic
+        logistics options.
+    OrderBottomLine:
+      required:
+        - currency
+      type: object
+      properties:
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: 'The currency identifier according to ISO 4217. Example: "NOK".'
+        tipAmount:
+          type: integer
+          description: >-
+            Tip amount for the order. Must be in minor units. The smallest unit
+            of a currency. Example 100 NOK = 10000.
+          format: int64
+          nullable: true
+        giftCardAmount:
+          type: integer
+          description: >-
+            Amount paid by gift card or coupon. Must be in minor units. The
+            smallest unit of a currency. Example 100 NOK = 10000.
+          format: int64
+          nullable: true
+        terminalId:
+          type: string
+          description: Identifier of the terminal / point of sale.
+          nullable: true
+        paymentSources:
+          allOf:
+            - $ref: '#/components/schemas/PaymentSources'
+          description: >-
+            May be used to indicate that the payment comes from multiple
+            sources. Example: giftcard + card
+          nullable: true
+        receiptNumber:
+          type: string
+          description: ''
+          nullable: true
+    OrderLine:
+      required:
+        - id
+        - name
+        - taxRate
+        - totalAmount
+        - totalAmountExcludingTax
+        - totalTaxAmount
+      type: object
+      properties:
+        name:
+          maxLength: 2048
+          minLength: 1
+          type: string
+          description: The name of the product in the order line.
+        id:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: The product ID.
+        totalAmount:
+          minimum: 0
+          type: integer
+          description: >-
+            Total amount of the order line, including tax and discount. Must be
+            in minor units. The smallest unit of a currency. Example 100 NOK =
+            10000.
+          format: int64
+        totalAmountExcludingTax:
+          minimum: 0
+          type: integer
+          description: >-
+            Total amount of order line with discount excluding tax. Must be in
+            minor units. The smallest unit of a currency. Example 100 NOK =
+            10000.
+          format: int64
+        totalTaxAmount:
+          minimum: 0
+          type: integer
+          description: >-
+            Total tax amount paid for the order line. Must be in minor units.
+            The smallest unit of a currency. Example 100 NOK = 10000.
+          format: int64
+        taxPercentage:
+          maximum: 100
+          minimum: 0
+          type: integer
+          description: Use TaxRate property instead
+          format: int32
+          nullable: true
+          deprecated: true
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: >-
+            Tax percentage for the order line, represented with 0.01 decimal
+            points. 5000 equals 50% . Between 0-10000
+          format: int32
+        unitInfo:
+          allOf:
+            - $ref: '#/components/schemas/OrderUnitInfo'
+          description: >-
+            If no quantity info is provided the order line will default to 1
+            pcs.
+          nullable: true
+        discount:
+          minimum: 0
+          type: integer
+          description: >-
+            Total discount for the order line. Must be in minor units. The
+            smallest unit of a currency. Example 100 NOK = 10000.
+          format: int64
+          nullable: true
+        productUrl:
+          type: string
+          description: URL linking back to the product at the merchant.
+          nullable: true
+        isReturn:
+          type: boolean
+          description: >-
+            Flag for marking the orderline as returned. This will make it count
+            negative towards all the sums in BottomLine.
+          nullable: true
+        isShipping:
+          type: boolean
+          description: >-
+            Flag for marking the orderline as a shipping line. This will be
+            shown differently in the app.
+          nullable: true
+    OrderSummary:
+      required:
+        - orderBottomLine
+        - orderLines
+      type: object
+      properties:
+        orderLines:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLine'
+          description: >-
+            The order lines contain descriptions of each item present in the
+            order.
+        orderBottomLine:
+          allOf:
+            - $ref: '#/components/schemas/OrderBottomLine'
+          description: Contains information regarding the order as a whole.
+    OrderUnitInfo:
+      required:
+        - quantity
+        - quantityUnit
+        - unitPrice
+      type: object
+      properties:
+        unitPrice:
+          minimum: 0
+          type: integer
+          description: >-
+            Total price per unit, including tax and excluding discount. Must be
+            in minor units. The smallest unit of a currency. Example 100 NOK =
+            10000.
+          format: int64
+        quantity:
+          type: string
+          description: Quantity given as a integer or fraction (only for cosmetics).
+        quantityUnit:
+          allOf:
+            - $ref: '#/components/schemas/QuantityUnit'
+          description: Available units for quantity. Will default to PCS if not set.
+    OtherLogisticsOption:
+      required:
+        - amount
+        - brand
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LogisticsOptionBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: >-
+            Amount including tax and discount. Must be in minor units. The
+            smallest unit of a currency. Example 100 NOK = 10000.
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: ''
+          format: int32
+          nullable: true
+        type:
+          allOf:
+            - $ref: '#/components/schemas/OtherType'
+          description: Logistic type
+          nullable: true
+        brand:
+          pattern: OTHER
+          type: string
+          default: OTHER
+      description: ''
+    OtherType:
+      enum:
+        - HOME_DELIVERY
+        - PICKUP_POINT
+      type: string
+    PaymentMethod:
+      enum:
+        - Wallet
+        - Card
+        - BankTransfer
+      type: string
+    PaymentSources:
+      type: object
+      properties:
+        giftCard:
+          type: integer
+          description: Amount from gift card
+          format: int64
+          nullable: true
+        card:
+          type: integer
+          description: Amount from card
+          format: int64
+          nullable: true
+        voucher:
+          type: integer
+          description: Amount from voucher
+          format: int64
+          nullable: true
+        cash:
+          type: integer
+          description: Amount from cash
+          format: int64
+          nullable: true
+    PaymentState:
+      enum:
+        - CREATED
+        - AUTHORIZED
+        - TERMINATED
+      type: string
+    PaymentTransaction:
+      required:
+        - amount
+        - paymentDescription
+      type: object
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: ''
+        reference:
+          type: string
+          description: >-
+            Deprecated in favor of the top-level The merchant's unique reference
+            for the transaction. Also known as OrderId. Example:
+            "acme-shop-123-order123abc". See
+            https://developer.vippsmobilepay.com/docs/knowledge-base/orderid/
+          nullable: true
+          deprecated: true
+        paymentDescription:
+          maxLength: 100
+          minLength: 3
+          type: string
+          description: >-
+            Description visible to the customer during payment. Example: "One
+            pair of socks".
+        orderSummary:
+          allOf:
+            - $ref: '#/components/schemas/OrderSummary'
+          description: >-
+            Contain descriptions of each item present in the order, and an order
+            bottom line for information regarding the order as a whole.
+          nullable: true
+    PeriodSubscriptionCampaign:
+      required:
+        - period
+        - type
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/SubscriptionCampaign'
+      properties:
+        period:
+          allOf:
+            - $ref: '#/components/schemas/Interval'
+        type:
+          pattern: PERIOD_CAMPAIGN
+          type: string
+          default: PERIOD_CAMPAIGN
+    PickupPoint:
+      required:
+        - address
+        - city
+        - country
+        - id
+        - name
+        - postalCode
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Pickup point id provided by the carrier. Example: 121648'
+        name:
+          type: string
+          description: 'Pickup point name. Example: Extra Eiganes'
+        address:
+          type: string
+          description: 'Pickup point''s street address. Example: VITAMINVEIEN 7'
+        postalCode:
+          type: string
+          description: 'Pickup point''s postal code. Example: 0485'
+        city:
+          type: string
+          description: 'Pickup point''s city. Example: OSLO'
+        country:
+          type: string
+          description: 'Pickup point''s country. Example: NO'
+        openingHours:
+          type: array
+          items:
+            type: string
+          description: 'Pickup point''s opening hours. Example: Man-Søn: 1000-2000'
+          nullable: true
+        leadTime:
+          allOf:
+            - $ref: '#/components/schemas/LeadTime'
+          description: Pickup point's lead time.
+          nullable: true
+      description: The pickup point the customer selected .
+    Porterbuddy:
+      required:
+        - apiKey
+        - origin
+        - publicToken
+      type: object
+      properties:
+        publicToken:
+          type: string
+          description: The public key provided to you by Porterbuddy
+        apiKey:
+          minLength: 1
+          type: string
+          description: The API key provided to you by Porterbuddy
+        origin:
+          allOf:
+            - $ref: '#/components/schemas/PorterbuddyOrigin'
+          description: Information about the sender
+          deprecated: true
+      description: Configuration required to enable Porterbuddy logistics options
+      deprecated: true
+    PorterbuddyLogisticsOption:
+      required:
+        - amount
+        - brand
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LogisticsOptionBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: >-
+            Amounts are specified in minor units. For example: 10.00 NOK should
+            be written as 1000; 20.50 EUR should be written as 2050.
+        type:
+          allOf:
+            - $ref: '#/components/schemas/PorterbuddyLogisticsType'
+          nullable: true
+        customType:
+          type: string
+          nullable: true
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: >-
+            Tax percentage, represented with 0.01 decimal points. 5000 equals
+            50% . Between 0-10000
+          format: int32
+          nullable: true
+        brand:
+          pattern: PORTERBUDDY
+          type: string
+          default: PORTERBUDDY
+    PorterbuddyLogisticsType:
+      enum:
+        - HOME_DELIVERY
+      type: string
+    PorterbuddyOrigin:
+      required:
+        - address
+        - email
+        - name
+        - phoneNumber
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of your store
+        email:
+          type: string
+          description: >-
+            Your email address where Porterbuddy booking confirmation will be
+            sent
+        phoneNumber:
+          type: string
+          description: >-
+            Your phone number where Porterbuddy may send you important messages.
+            Format must be MSISDN (including country code). Example:
+            "4712345678"
+        address:
+          allOf:
+            - $ref: '#/components/schemas/PorterbuddyOriginAddress'
+          description: Your address where Porterbuddy will pick up the parcels
+          deprecated: true
+      description: Details about the sender of the Porterbuddy parcels
+      deprecated: true
+    PorterbuddyOriginAddress:
+      required:
+        - city
+        - country
+        - postalCode
+        - streetAddress
+      type: object
+      properties:
+        streetAddress:
+          type: string
+          description: 'Example: "Robert Levins gate 5"'
+        postalCode:
+          type: string
+          description: 'Example: "0154"'
+        city:
+          type: string
+          description: 'Example: "Oslo"'
+        country:
+          type: string
+          description: 'The ISO-3166-1 Alpha-2 representation of the country. Example: "NO"'
+      deprecated: true
+    PostenLogisticsOption:
+      required:
+        - amount
+        - brand
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LogisticsOptionBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: >-
+            Amounts are specified in minor units. For example: 10.00 NOK should
+            be written as 1000; 20.50 EUR should be written as 2050.
+        type:
+          allOf:
+            - $ref: '#/components/schemas/PostenLogisticsType'
+          nullable: true
+        customType:
+          type: string
+          nullable: true
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: >-
+            Tax percentage, represented with 0.01 decimal points. 5000 equals
+            50% . Between 0-10000
+          format: int32
+          nullable: true
+        brand:
+          pattern: POSTEN
+          type: string
+          default: POSTEN
+    PostenLogisticsType:
+      enum:
+        - MAILBOX
+        - PICKUP_POINT
+        - HOME_DELIVERY
+      type: string
+    PostiLogisticsOption:
+      required:
+        - amount
+        - brand
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LogisticsOptionBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: >-
+            Amounts are specified in minor units. For example: 10.00 NOK should
+            be written as 1000; 20.50 EUR should be written as 2050.
+        type:
+          allOf:
+            - $ref: '#/components/schemas/PostiLogisticsType'
+          nullable: true
+        customType:
+          type: string
+          nullable: true
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: >-
+            Tax percentage, represented with 0.01 decimal points. 5000 equals
+            50% . Between 0-10000
+          format: int32
+          nullable: true
+        brand:
+          pattern: POSTI
+          type: string
+          default: POSTI
+    PostiLogisticsType:
+      enum:
+        - PICKUP_POINT
+      type: string
+    PostnordLogisticsOption:
+      required:
+        - amount
+        - brand
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LogisticsOptionBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: >-
+            Amounts are specified in minor units. For example: 10.00 NOK should
+            be written as 1000; 20.50 EUR should be written as 2050.
+        type:
+          allOf:
+            - $ref: '#/components/schemas/PostnordLogisticsType'
+          nullable: true
+        customType:
+          type: string
+          nullable: true
+        taxRate:
+          maximum: 10000
+          minimum: 0
+          type: integer
+          description: >-
+            Tax percentage, represented with 0.01 decimal points. 5000 equals
+            50% . Between 0-10000
+          format: int32
+          nullable: true
+        brand:
+          pattern: POSTNORD
+          type: string
+          default: POSTNORD
+    PostnordLogisticsType:
+      enum:
+        - PICKUP_POINT
+        - HOME_DELIVERY
+      type: string
+    PrefillCustomer:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: 'Example: "Ada"'
+          nullable: true
+        lastName:
+          type: string
+          description: 'Example: "Lovelace"'
+          nullable: true
+        email:
+          type: string
+          description: 'Example: "user@example.com"'
+          nullable: true
+        phoneNumber:
+          type: string
+          description: >-
+            Format must be MSISDN (including country code). Example:
+            "4712345678"
+          nullable: true
+        streetAddress:
+          type: string
+          description: 'Example: "Robert Levins gate 5"'
+          nullable: true
+        city:
+          type: string
+          description: 'Example: "Oslo"'
+          nullable: true
+        postalCode:
+          type: string
+          description: 'Example: "0154"'
+          nullable: true
+        country:
+          type: string
+          description: 'The ISO-3166-1 Alpha-2 representation of the country. Example: "NO"'
+          nullable: true
+      description: |-
+        Information about the customer to be prefilled
+                    
+        If any of the customer information is invalid such as the phone number,
+        the customer will be prompted to input new user information.
+    PriceSubscriptionCampaign:
+      required:
+        - end
+        - type
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/SubscriptionCampaign'
+      properties:
+        end:
+          minLength: 1
+          type: string
+        type:
+          pattern: PRICE_CAMPAIGN
+          type: string
+          default: PRICE_CAMPAIGN
+    QuantityUnit:
+      enum:
+        - PCS
+        - KG
+        - KM
+        - MINUTE
+        - LITRE
+      type: string
+    ResponseCardPaymentDetails:
+      required:
+        - amount
+        - state
+        - type
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResponsePaymentDetailsBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: ''
+        state:
+          allOf:
+            - $ref: '#/components/schemas/PaymentState'
+          description: ''
+        aggregate:
+          allOf:
+            - $ref: '#/components/schemas/TransactionAggregate'
+          description: ''
+          nullable: true
+        type:
+          pattern: Card
+          type: string
+          default: Card
+      description: Defines the details of a card payment.
+    ResponsePaymentDetailsBase:
+      type: object
+    ResponseSubscriptionDetails:
+      type: object
+      properties:
+        state:
+          allOf:
+            - $ref: '#/components/schemas/SubscriptionState'
+          description: The state of the recurring agreement.
+          nullable: true
+        agreementId:
+          type: string
+          description: >-
+            The reference for the agreement. Used to create future charges, as
+            well as updates to the agreement.
+          nullable: true
+      description: Defines the details of the transaction
+    ResponseWalletPaymentDetails:
+      required:
+        - amount
+        - state
+        - type
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResponsePaymentDetailsBase'
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: ''
+        state:
+          allOf:
+            - $ref: '#/components/schemas/PaymentState'
+          description: ''
+        aggregate:
+          allOf:
+            - $ref: '#/components/schemas/TransactionAggregate'
+          description: ''
+          nullable: true
+        type:
+          pattern: Wallet
+          type: string
+          default: Wallet
+      description: Defines the details of a wallet payment.
+    SessionResponse:
+      required:
+        - reference
+        - sessionId
+        - sessionState
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: 'The Id of the session. Example: "v52EtjZriRmGiKiAKHByK2".'
+        merchantSerialNumber:
+          type: string
+          description: 'The merchant''s serial number. Example: "123456"'
+          nullable: true
+        reference:
+          type: string
+          description: >-
+            The merchant's unique reference for the transaction. Also known as
+            OrderId. Example: "acme-shop-123-order123abc". See
+            https://developer.vippsmobilepay.com/docs/knowledge-base/orderid/
+        sessionState:
+          allOf:
+            - $ref: '#/components/schemas/ExternalSessionState'
+          description: >-
+            The state of the session. Example: "SessionStarted". The state of
+            the payment is in PaymentDetails.State.
+        paymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/PaymentMethod'
+          description: ''
+          nullable: true
+        subscriptionDetails:
+          allOf:
+            - $ref: '#/components/schemas/ResponseSubscriptionDetails'
+          description: ''
+          nullable: true
+        paymentDetails:
+          oneOf:
+            - $ref: '#/components/schemas/ResponseWalletPaymentDetails'
+            - $ref: '#/components/schemas/ResponseCardPaymentDetails'
+          description: ''
+          nullable: true
+        userInfo:
+          allOf:
+            - $ref: '#/components/schemas/UserInfo'
+          description: ''
+          nullable: true
+        shippingDetails:
+          allOf:
+            - $ref: '#/components/schemas/ShippingDetails'
+          description: ''
+          nullable: true
+        billingDetails:
+          allOf:
+            - $ref: '#/components/schemas/BillingDetails'
+          description: ''
+          nullable: true
+        customConsentProvided:
+          type: boolean
+          description: ''
+          nullable: true
+      description: Session information
+    ShippingDetails:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: 'Example: "Ada"'
+          nullable: true
+        lastName:
+          type: string
+          description: 'Example: "Lovelace"'
+          nullable: true
+        email:
+          type: string
+          description: 'Example: "user@example.com"'
+          nullable: true
+        phoneNumber:
+          type: string
+          description: >-
+            If no country code is provided, defaults to Norway (47). Example:
+            "4712345678"
+          nullable: true
+        streetAddress:
+          type: string
+          description: 'Example: "Robert Levins gate 5"'
+          nullable: true
+        postalCode:
+          type: string
+          description: 'Example: "0154"'
+          nullable: true
+        city:
+          type: string
+          description: 'Example: "Oslo"'
+          nullable: true
+        country:
+          type: string
+          description: 'The ISO-3166-1 Alpha-2 representation of the country. Example: "NO"'
+          nullable: true
+        shippingMethodId:
+          type: string
+          description: 'Id of the shipping method. Example: "123abc"'
+          nullable: true
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: Shipping method amount
+          nullable: true
+        pickupPoint:
+          allOf:
+            - $ref: '#/components/schemas/PickupPoint'
+          description: The selected pickup point.
+          nullable: true
+        timeslot:
+          allOf:
+            - $ref: '#/components/schemas/Timeslot'
+          description: The selected time slot
+          nullable: true
+      description: Defines the details of the shipping
+    Subscription:
+      required:
+        - amount
+        - interval
+        - merchantAgreementUrl
+        - productName
+      type: object
+      properties:
+        productName:
+          maxLength: 45
+          minLength: 1
+          type: string
+          description: >-
+            Name of the subscription, visible to the customer during payment.
+            Example: "Bi-Weekly Socks".
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: The amount to be charged by the given interval
+        interval:
+          allOf:
+            - $ref: '#/components/schemas/Interval'
+          description: How often the amount is to be charged. For example every 2 weeks.
+        merchantAgreementUrl:
+          type: string
+          description: >-
+            Complete URL to the merchant's page regarding the subscription.
+            Example: "https://example.com/vipps/subscription/socks".
+        productDescription:
+          type: string
+          description: >-
+            Description visible to the customer during subscribing. Example:
+            "Bi-Weekly Subscription of 1 pair of socks".
+          nullable: true
+        campaign:
+          oneOf:
+            - $ref: '#/components/schemas/EventSubscriptionCampaign'
+            - $ref: '#/components/schemas/PeriodSubscriptionCampaign'
+            - $ref: '#/components/schemas/PriceSubscriptionCampaign'
+          description: A discount period that ends in a specified date and time.
+          nullable: true
+    SubscriptionCampaign:
+      required:
+        - price
+      type: object
+      properties:
+        price:
+          minimum: 0
+          type: integer
+          format: int32
+    SubscriptionState:
+      enum:
+        - PENDING
+        - ACTIVE
+        - STOPPED
+        - EXPIRED
+      type: string
+    ThirdPartyHeaders:
+      required:
+        - vipps-System-Name
+        - vipps-System-Plugin-Name
+        - vipps-System-Plugin-Version
+        - vipps-System-Version
+      type: object
+      properties:
+        vipps-System-Name:
+          maxLength: 30
+          type: string
+          description: 'The name of the ecommerce solution. Example: "Acme Commerce".'
+        vipps-System-Version:
+          maxLength: 30
+          type: string
+          description: 'The version number of the ecommerce solution. Example: "3.1.2".'
+        vipps-System-Plugin-Name:
+          maxLength: 30
+          type: string
+          description: 'The name of the ecommerce plugin. Example: "acme-webshop".'
+        vipps-System-Plugin-Version:
+          maxLength: 30
+          type: string
+          description: 'The version number of the ecommerce plugin. Example: "4.5.6".'
+      description: Information about the merchant system.
+    Timeslot:
+      required:
+        - date
+        - end
+        - id
+        - start
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Timeslot id provided by the carrier. Example: 121648'
+        date:
+          type: string
+          description: 'The date for the timeslot. Example: 2025-03-15'
+          format: date
+        start:
+          type: string
+          description: 'Start time. Example: 08:30'
+          format: time
+        end:
+          type: string
+          description: 'End time. Example: 10:30'
+          format: time
+    TransactionAggregate:
+      type: object
+      properties:
+        cancelledAmount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: ''
+          nullable: true
+        capturedAmount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: ''
+          nullable: true
+        refundedAmount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: ''
+          nullable: true
+        authorizedAmount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          description: ''
+          nullable: true
+      description: Defines the details of the transaction
+    UpdateSessionRequest:
+      type: object
+      properties:
+        transaction:
+          allOf:
+            - $ref: '#/components/schemas/PaymentTransaction'
+          nullable: true
+        logisticOptions:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/PostenLogisticsOption'
+              - $ref: '#/components/schemas/BringLogisticsOption'
+              - $ref: '#/components/schemas/PostnordLogisticsOption'
+              - $ref: '#/components/schemas/PorterbuddyLogisticsOption'
+              - $ref: '#/components/schemas/HelthjemLogisticsOption'
+              - $ref: '#/components/schemas/PostiLogisticsOption'
+              - $ref: '#/components/schemas/GlsLogisticsOption'
+              - $ref: '#/components/schemas/DaoLogisticsOption'
+              - $ref: '#/components/schemas/OtherLogisticsOption'
+          nullable: true
+    UserFlow:
+      enum:
+        - WEB_REDIRECT
+        - NATIVE_REDIRECT
+      type: string
+    UserInfo:
+      required:
+        - sub
+      type: object
+      properties:
+        sub:
+          type: string
+          description: The openid sub that uniquely identifies a user.
+        email:
+          type: string
+          description: 'Example: "user@example.com"'
+          nullable: true
+      description: >-
+        Data from the UserInfo endpoint. Will only be present if UserInfo flow
+        is used.
+  parameters:
+    Vipps-System-Name:
+      name: Vipps-System-Name
+      in: header
+      description: >-
+        The name of the ecommerce solution. See
+        [http-headers](/docs/knowledge-base/http-headers).
+      required: true
+      schema:
+        maxLength: 30
+        required:
+          - Vipps-System-Name
+        type: string
+        description: >-
+          The name of the ecommerce solution. See
+          [http-headers](/docs/knowledge-base/http-headers).
+        default: '{{system_name}}'
+        example: Acme Commerce
+      example: Acme Commerce
+    Vipps-System-Version:
+      name: Vipps-System-Version
+      in: header
+      description: >-
+        The version number of the ecommerce solution. See
+        [http-headers](/docs/knowledge-base/http-headers).
+      required: true
+      schema:
+        maxLength: 30
+        required:
+          - Vipps-System-Version
+        type: string
+        description: >-
+          The version number of the ecommerce solution. See
+          [http-headers](/docs/knowledge-base/http-headers).
+        default: '{{system_version}}'
+        example: 3.1.2
+      example: 3.1.2
+    Vipps-System-Plugin-Name:
+      name: Vipps-System-Plugin-Name
+      in: header
+      description: >-
+        The name of the ecommerce plugin. See
+        [http-headers](/docs/knowledge-base/http-headers).
+      required: true
+      schema:
+        maxLength: 30
+        required:
+          - Vipps-System-Plugin-Name
+        type: string
+        description: >-
+          The name of the ecommerce plugin. See
+          [http-headers](/docs/knowledge-base/http-headers).
+        default: '{{system_plugin_name}}'
+        example: acme-webshop
+      example: acme-webshop
+    Vipps-System-Plugin-Version:
+      name: Vipps-System-Plugin-Version
+      in: header
+      description: >-
+        The version number of the ecommerce plugin. See
+        [http-headers](/docs/knowledge-base/http-headers).
+      required: true
+      schema:
+        maxLength: 30
+        required:
+          - Vipps-System-Plugin-Version
+        type: string
+        description: >-
+          The version number of the ecommerce plugin. See
+          [http-headers](/docs/knowledge-base/http-headers).
+        default: '{{system_plugin_version}}'
+        example: 4.5.6
+      example: 4.5.6
+    client_id:
+      name: client_id
+      in: header
+      description: >-
+        Client ID for the merchant (the "username"). See [API
+        keys](/docs/knowledge-base/api-keys/).
+      required: true
+      schema:
+        required:
+          - client_id
+        type: string
+        description: >-
+          Client ID for the merchant (the "username"). See [API
+          keys](/docs/knowledge-base/api-keys/).
+        default: '{{client_id}}'
+        example: fb492b5e-7907-4d83-bc20-c7fb60ca35de
+      example: fb492b5e-7907-4d83-bc20-c7fb60ca35de
+    client_secret:
+      name: client_secret
+      in: header
+      description: >-
+        Client Secret for the merchant (the "password"). See [API
+        keys](/docs/knowledge-base/api-keys/).
+      required: true
+      schema:
+        required:
+          - client_secret
+        type: string
+        description: >-
+          Client Secret for the merchant (the "password"). See [API
+          keys](/docs/knowledge-base/api-keys/).
+        default: '{{client_secret}}'
+        example: Y8Kteew6GE3ZmeycEt6egg==
+      example: Y8Kteew6GE3ZmeycEt6egg==
+    Ocp-Apim-Subscription-Key:
+      name: Ocp-Apim-Subscription-Key
+      in: header
+      description: >-
+        Vipps Subscription key for the API product. See [API
+        keys](/docs/knowledge-base/api-keys/).
+      required: true
+      schema:
+        required:
+          - Ocp-Apim-Subscription-Key
+        type: string
+        description: >-
+          Vipps Subscription key for the API product. See [API
+          keys](/docs/knowledge-base/api-keys/).
+        default: '{{Ocp-Apim-Subscription-Key}}'
+        example: 0f14ebcab0eb4b29ae0cb90d91b4a84a
+      example: 0f14ebcab0eb4b29ae0cb90d91b4a84a
+    Merchant-Serial-Number:
+      name: Merchant-Serial-Number
+      in: header
+      description: >-
+        Vipps assigned unique number for a merchant. See [API
+        keys](/docs/knowledge-base/api-keys/).
+      required: true
+      schema:
+        required:
+          - Merchant-Serial-Number
+        type: string
+        description: >-
+          Vipps assigned unique number for a merchant. See [API
+          keys](/docs/knowledge-base/api-keys/).
+        default: '{{merchantSerialNumber}}'
+        example: '123456'
+      example: '123456'
+    Idempotency-Key:
+      name: Idempotency-Key
+      in: header
+      description: >-
+        Idempotency key for the request, ensures idempotent actions. See
+        [Idempotency](/docs/knowledge-base/http-headers#idempotency).
+      schema:
+        type: string
+        description: >-
+          Idempotency key for the request, ensures idempotent actions. See
+          [Idempotency](/docs/knowledge-base/http-headers#idempotency).
+        default: '{{Idempotency-Key}}'
+        example: fb492b5e-7907-4d83-ba20-c7fb60ca35de
+      example: fb492b5e-7907-4d83-ba20-c7fb60ca35de
