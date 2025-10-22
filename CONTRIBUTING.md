@@ -103,7 +103,6 @@ All submissions require review. We use GitHub pull requests for this purpose.
 If you have questions, please:
 - Check existing issues and pull requests
 - Open a new issue for discussion
-- Contact us at developer@vipps.no
 
 ## License
 
