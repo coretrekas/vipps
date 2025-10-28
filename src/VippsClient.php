@@ -168,10 +168,12 @@ class VippsClient
             $token = $this->getAccessToken();
 
             $headers = array_merge([
+                'client_id' => $this->clientId,
+                'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . $token,
+                'client_secret' => $this->clientSecret,
                 'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
                 'Merchant-Serial-Number' => $this->merchantSerialNumber,
-                'Content-Type' => 'application/json',
             ], $options['headers'] ?? []);
 
             $options['headers'] = $headers;
