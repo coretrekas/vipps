@@ -6,11 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.1.2] - 2025-10-28
+- Added client id and client secret to request headers.
 - Added system info headers (Vipps-System-Name, Vipps-System-Version, Vipps-System-Plugin-Name, Vipps-System-Plugin-Version) to all API requests
 - System info can now be set via constructor options or setSystemInfo() method
-
-## [1.1.1] - 2025-10-28
-- Added client id and client secret to request headers.
 
 ## [1.0.0] - 2025-10-15
 

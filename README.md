@@ -1,8 +1,8 @@
 # Vipps MobilePay PHP SDK
 
-[![Latest Version](https://img.shields.io/packagist/v/coretrekas/vipps.svg)](https://packagist.org/packages/coretrekas/vipps)
-[![PHP Version](https://img.shields.io/packagist/php-v/coretrekas/vipps.svg)](https://packagist.org/packages/coretrekas/vipps)
-[![License](https://img.shields.io/packagist/l/coretrekas/vipps.svg)](https://packagist.org/packages/coretrekas/vipps)
+[![Latest Version](https://img.shields.io/packagist/v/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
+[![PHP Version](https://img.shields.io/packagist/php-v/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
+[![License](https://img.shields.io/packagist/l/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
 
 A comprehensive, production-ready PHP SDK for Vipps MobilePay APIs, providing easy integration with:
 - **Checkout API v3** - Complete checkout sessions for payments and subscriptions
@@ -14,6 +14,7 @@ A comprehensive, production-ready PHP SDK for Vipps MobilePay APIs, providing ea
 - ✅ **Full API Coverage** - Complete support for Checkout API v3, Recurring Payments API v3, and Login API v1
 - ✅ **Automatic Token Management** - Access tokens cached and refreshed automatically
 - ✅ **Fluent Builders** - Easy-to-use builder interfaces for sessions, agreements, and authorization URLs
+- ✅ **System Info Headers** - Optional system information headers for better tracking and support
 - ✅ **Type-Safe** - PHP 8.1+ with strict types and full type hints
 - ✅ **Error Handling** - Comprehensive exception handling with detailed error information
 - ✅ **PSR Compliant** - PSR-3 (Logger), PSR-4 (Autoloading), PSR-12 (Code Style), PSR-18 (HTTP Client)
@@ -74,6 +75,36 @@ $client = new VippsClient(
     testMode: true // Set to false for production
 );
 ```
+
+#### Optional: Set System Information Headers
+
+You can optionally provide system information that will be sent with all API requests for better tracking and support:
+
+```php
+$client = new VippsClient(
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    subscriptionKey: 'your-subscription-key',
+    merchantSerialNumber: 'your-msn',
+    testMode: true,
+    options: [
+        'systemName' => 'MyEcommercePlatform',
+        'systemVersion' => '2.1.0',
+        'pluginName' => 'VippsPaymentPlugin',
+        'pluginVersion' => '1.5.3',
+    ]
+);
+
+// Or set it later
+$client->setSystemInfo(
+    systemName: 'MyEcommercePlatform',
+    systemVersion: '2.1.0',
+    pluginName: 'VippsPaymentPlugin',
+    pluginVersion: '1.5.3'
+);
+```
+
+These headers help Vipps support team identify your integration and provide better assistance.
 
 ### Create a Payment Session (Checkout API)
 
