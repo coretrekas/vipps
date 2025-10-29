@@ -30,6 +30,10 @@ class VippsClient
     private LoggerInterface $logger;
     private ?string $accessToken = null;
     private ?int $tokenExpiresAt = null;
+    private ?string $systemName = null;
+    private ?string $systemVersion = null;
+    private ?string $pluginName = null;
+    private ?string $pluginVersion = null;
 
     /**
      * @param string $clientId Client ID from Vipps portal
@@ -54,6 +58,12 @@ class VippsClient
         ]);
 
         $this->logger = $options['logger'] ?? new NullLogger();
+
+        // Set default system info if provided
+        $this->systemName = $options['system_name'] ?? null;
+        $this->systemVersion = $options['system_version'] ?? null;
+        $this->pluginName = $options['plugin_name'] ?? null;
+        $this->pluginVersion = $options['plugin_version'] ?? null;
     }
 
     /**
@@ -78,6 +88,17 @@ class VippsClient
     public function getBaseUrl(): string
     {
         return $this->testMode ? self::TEST_URL : self::PRODUCTION_URL;
+    }
+
+    /**
+     * Set system information for API requests
+     */
+    public function setSystemInfo(string $systemName, string $systemVersion, string $pluginName, string $pluginVersion): void
+    {
+        $this->systemName = $systemName;
+        $this->systemVersion = $systemVersion;
+        $this->pluginName = $pluginName;
+        $this->pluginVersion = $pluginVersion;
     }
 
     /**
@@ -175,6 +196,20 @@ class VippsClient
                 'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
                 'Merchant-Serial-Number' => $this->merchantSerialNumber,
             ], $options['headers'] ?? []);
+
+            // Add system info headers if set
+            if ($this->systemName !== null) {
+                $headers['Vipps-System-Name'] = $this->systemName;
+            }
+            if ($this->systemVersion !== null) {
+                $headers['Vipps-System-Version'] = $this->systemVersion;
+            }
+            if ($this->pluginName !== null) {
+                $headers['Vipps-System-Plugin-Name'] = $this->pluginName;
+            }
+            if ($this->pluginVersion !== null) {
+                $headers['Vipps-System-Plugin-Version'] = $this->pluginVersion;
+            }
 
             $options['headers'] = $headers;
 

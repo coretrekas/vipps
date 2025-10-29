@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-10-28
+- Added system info headers (Vipps-System-Name, Vipps-System-Version, Vipps-System-Plugin-Name, Vipps-System-Plugin-Version) to all API requests
+- System info can now be set via constructor options or setSystemInfo() method
+
 ## [1.1.1] - 2025-10-28
 - Added client id and client secret to request headers.
 
@@ -13,19 +17,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release of Vipps MobilePay PHP SDK
 - Full support for Checkout API v3
-  - Create payment sessions
-  - Create subscription sessions
-  - Get session information
-  - Update sessions
-  - Expire sessions
-  - Fluent SessionBuilder for easy session creation
+    - Create payment sessions
+    - Create subscription sessions
+    - Get session information
+    - Update sessions
+    - Expire sessions
+    - Fluent SessionBuilder for easy session creation
 - Full support for Recurring API v3
-  - Create, list, get, and update agreements
-  - Create, list, get, cancel, capture, and refund charges
-  - Support for multiple charge creation (async)
-  - Fluent AgreementBuilder for easy agreement creation
-  - Support for all pricing types (LEGACY, VARIABLE, FLEXIBLE)
-  - Support for all campaign types (PRICE, PERIOD, EVENT)
+    - Create, list, get, and update agreements
+    - Create, list, get, cancel, capture, and refund charges
+    - Support for multiple charge creation (async)
+    - Fluent AgreementBuilder for easy agreement creation
+    - Support for all pricing types (LEGACY, VARIABLE, FLEXIBLE)
+    - Support for all campaign types (PRICE, PERIOD, EVENT)
 - Automatic access token management with caching
 - Comprehensive error handling with VippsException
 - PSR-3 logger support
@@ -48,16 +52,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Full support for Login API v1 (OAuth 2.0 / OpenID Connect)
-  - Authorization URL builder with fluent interface
-  - Token exchange (authorization code flow)
-  - User information retrieval
-  - CIBA (Client Initiated Backchannel Authentication) support
-  - User existence check
-  - OpenID Connect discovery
-  - JWKS (JSON Web Key Set) retrieval
-  - PKCE (Proof Key for Code Exchange) support
-  - State and nonce generation helpers
-  - Code verifier generation
+    - Authorization URL builder with fluent interface
+    - Token exchange (authorization code flow)
+    - User information retrieval
+    - CIBA (Client Initiated Backchannel Authentication) support
+    - User existence check
+    - OpenID Connect discovery
+    - JWKS (JSON Web Key Set) retrieval
+    - PKCE (Proof Key for Code Exchange) support
+    - State and nonce generation helpers
+    - Code verifier generation
 - 31 new unit tests for Login API (100% pass rate)
 - Complete Login API documentation in README
 - Login flow example with OAuth and CIBA flows
