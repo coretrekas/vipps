@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Coretrek\Vipps;
 
 use Coretrek\Vipps\Checkout\CheckoutApi;
+use Coretrek\Vipps\EPayment\EPaymentApi;
 use Coretrek\Vipps\Exceptions\VippsException;
 use Coretrek\Vipps\Login\LoginApi;
 use Coretrek\Vipps\Recurring\RecurringApi;
@@ -80,6 +81,22 @@ class VippsClient
     public function recurring(): RecurringApi
     {
         return new RecurringApi($this);
+    }
+
+    /**
+     * Get the ePayment API instance
+     */
+    public function epayment(): EPaymentApi
+    {
+        return new EPaymentApi($this);
+    }
+
+    /**
+     * Get the Login API instance
+     */
+    public function login(): LoginApi
+    {
+        return new LoginApi($this);
     }
 
     /**
@@ -265,13 +282,5 @@ class VippsClient
     public function isTestMode(): bool
     {
         return $this->testMode;
-    }
-
-    /**
-     * Get Login API instance
-     */
-    public function login(): LoginApi
-    {
-        return new LoginApi($this);
     }
 }

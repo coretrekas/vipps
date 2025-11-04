@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-11-04
+
+### Added
+- Full support for ePayment API v1
+    - Create payments with multiple user flows (WEB_REDIRECT, PUSH_MESSAGE, QR, NATIVE_REDIRECT)
+    - Get payment details and status
+    - Get payment event log
+    - Capture payments (full or partial)
+    - Refund payments (full or partial)
+    - Cancel payments
+    - Force approve payments (test environment only)
+    - Fluent PaymentBuilder for easy payment creation
+    - Support for payment receipts with order lines
+    - Support for shipping options (fixed and dynamic)
+    - Support for QR code payments with customizable formats
+    - Support for customer identification (phone number, personal QR, token)
+    - Support for user profile data collection
+    - Support for industry-specific data (airline data)
+    - Support for metadata
+- 22 new unit tests for ePayment API (100% pass rate)
+- Complete ePayment API documentation in README
+- ePayment payment example with 11 different scenarios
+- Helper methods: `createSimplePayment()`, `captureAmount()`, `refundAmount()`
+
+### Changed
+- Updated README with comprehensive ePayment API examples
+- Updated package structure documentation to include ePayment API
+- Updated feature list to include ePayment API v1
+
 ## [1.1.2] - 2025-10-28
 - Added client id and client secret to request headers.
 - Added system info headers (Vipps-System-Name, Vipps-System-Version, Vipps-System-Plugin-Name, Vipps-System-Plugin-Version) to all API requests

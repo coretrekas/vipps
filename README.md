@@ -5,13 +5,14 @@
 [![License](https://img.shields.io/packagist/l/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
 
 A comprehensive, production-ready PHP SDK for Vipps MobilePay APIs, providing easy integration with:
+- **ePayment API v1** - Online and in-person payments with full lifecycle management
 - **Checkout API v3** - Complete checkout sessions for payments and subscriptions
 - **Recurring Payments API v3** - Recurring payment agreements and charges
 - **Login API v1** - OAuth 2.0 / OpenID Connect authentication
 
 ## Features
 
-- ✅ **Full API Coverage** - Complete support for Checkout API v3, Recurring Payments API v3, and Login API v1
+- ✅ **Full API Coverage** - Complete support for ePayment API v1, Checkout API v3, Recurring Payments API v3, and Login API v1
 - ✅ **Automatic Token Management** - Access tokens cached and refreshed automatically
 - ✅ **Fluent Builders** - Easy-to-use builder interfaces for sessions, agreements, and authorization URLs
 - ✅ **System Info Headers** - Optional system information headers for better tracking and support
@@ -45,6 +46,9 @@ The SDK is organized under the `Coretrek\Vipps` namespace:
 ```
 Coretrek\Vipps\
 ├── VippsClient                  # Main SDK client
+├── EPayment\
+│   ├── EPaymentApi              # ePayment API methods
+│   └── PaymentBuilder           # Fluent builder for payments
 ├── Checkout\
 │   ├── CheckoutApi              # Checkout API methods
 │   └── SessionBuilder           # Fluent builder for sessions
@@ -105,6 +109,220 @@ $client->setSystemInfo(
 ```
 
 These headers help Vipps support team identify your integration and provide better assistance.
+
+## ePayment API
+
+The ePayment API is designed for online and in-person payments with full lifecycle management including authorization, capture, refund, and cancellation.
+
+### Create a Payment
+
+```php
+// Simple payment creation
+$payment = $client->epayment()->createSimplePayment(
+    reference: 'order-12345',
+    amount: 10000, // Amount in minor units (100.00 NOK)
+    currency: 'NOK',
+    userFlow: 'WEB_REDIRECT',
+    options: [
+        'returnUrl' => 'https://example.com/order/12345/complete',
+        'paymentDescription' => 'Order #12345',
+    ]
+);
+
+// Redirect user to payment page
+header('Location: ' . $payment['redirectUrl']);
+```
+
+### Create a Payment with Builder (Recommended)
+
+```php
+$payment = $client->epayment()
+    ->buildPayment()
+    ->amount(10000, 'NOK')
+    ->reference('order-12345')
+    ->userFlow('WEB_REDIRECT')
+    ->returnUrl('https://example.com/order/12345/complete')
+    ->paymentDescription('Order #12345')
+    ->paymentMethod('WALLET')
+    ->customerInteraction('CUSTOMER_NOT_PRESENT')
+    ->idempotencyKey('payment-order-12345')
+    ->systemInfo('my-shop', '1.0.0', 'vipps-plugin', '1.0.0')
+    ->create();
+
+echo "Payment URL: " . $payment['redirectUrl'];
+```
+
+### Create a Payment with Receipt
+
+```php
+$orderLines = [
+    [
+        'name' => 'Premium Socks',
+        'id' => 'SOCK-001',
+        'totalAmount' => 5000,
+        'totalAmountExcludingTax' => 4000,
+        'totalTaxAmount' => 1000,
+        'unitInfo' => [
+            'unitPrice' => 2500,
+            'quantity' => '2',
+            'quantityUnit' => 'PCS',
+        ],
+    ],
+];
+
+$bottomLine = [
+    'currency' => 'NOK',
+    'receiptNumber' => 'order-12345',
+];
+
+$payment = $client->epayment()
+    ->buildPayment()
+    ->amount(5000, 'NOK')
+    ->reference('order-12345')
+    ->userFlow('WEB_REDIRECT')
+    ->returnUrl('https://example.com/order/12345/complete')
+    ->paymentDescription('Order with receipt')
+    ->paymentMethod('WALLET')
+    ->receipt($orderLines, $bottomLine)
+    ->metadata(['orderId' => 'order-12345', 'customerId' => 'CUST-123'])
+    ->create();
+```
+
+### Get Payment Details
+
+```php
+$payment = $client->epayment()->getPayment('order-12345');
+
+echo "Payment State: " . $payment['state'];
+echo "Amount: " . $payment['amount']['value'] . ' ' . $payment['amount']['currency'];
+echo "Authorized: " . $payment['aggregate']['authorizedAmount']['value'];
+echo "Captured: " . $payment['aggregate']['capturedAmount']['value'];
+```
+
+### Capture a Payment
+
+```php
+// Capture full amount
+$result = $client->epayment()->captureAmount(
+    reference: 'order-12345',
+    amount: 10000,
+    currency: 'NOK',
+    headers: ['Idempotency-Key' => 'capture-order-12345']
+);
+
+// Or use the detailed method
+$result = $client->epayment()->capturePayment('order-12345', [
+    'modificationAmount' => [
+        'value' => 10000,
+        'currency' => 'NOK',
+    ],
+]);
+```
+
+### Refund a Payment
+
+```php
+// Refund partial amount
+$result = $client->epayment()->refundAmount(
+    reference: 'order-12345',
+    amount: 5000,
+    currency: 'NOK',
+    headers: ['Idempotency-Key' => 'refund-order-12345']
+);
+
+// Or use the detailed method
+$result = $client->epayment()->refundPayment('order-12345', [
+    'modificationAmount' => [
+        'value' => 5000,
+        'currency' => 'NOK',
+    ],
+]);
+```
+
+### Cancel a Payment
+
+```php
+$result = $client->epayment()->cancelPayment('order-12345');
+
+echo "Payment State: " . $result['state']; // TERMINATED
+```
+
+### Get Payment Event Log
+
+```php
+$events = $client->epayment()->getPaymentEventLog('order-12345');
+
+foreach ($events as $event) {
+    echo $event['name'] . ' at ' . $event['timestamp'] . "\n";
+}
+```
+
+### QR Code Payment
+
+```php
+$payment = $client->epayment()
+    ->buildPayment()
+    ->amount(5000, 'NOK')
+    ->reference('order-12345')
+    ->userFlow('QR')
+    ->qrFormat('IMAGE/SVG+XML')
+    ->paymentDescription('QR payment')
+    ->paymentMethod('WALLET')
+    ->create();
+
+echo "QR Code URL: " . $payment['redirectUrl'];
+```
+
+### Push Message Payment
+
+```php
+$payment = $client->epayment()
+    ->buildPayment()
+    ->amount(7500, 'NOK')
+    ->reference('order-12345')
+    ->userFlow('PUSH_MESSAGE')
+    ->customerPhoneNumber('4712345678')
+    ->paymentDescription('Push message payment')
+    ->paymentMethod('WALLET')
+    ->create();
+```
+
+### Payment with Shipping Options
+
+```php
+$payment = $client->epayment()
+    ->buildPayment()
+    ->amount(15000, 'NOK')
+    ->reference('order-12345')
+    ->userFlow('WEB_REDIRECT')
+    ->returnUrl('https://example.com/order/12345/complete')
+    ->paymentDescription('Order with shipping')
+    ->paymentMethod('WALLET')
+    ->fixedShipping([
+        [
+            'type' => 'HOME_DELIVERY',
+            'brand' => 'POSTEN',
+            'options' => [
+                [
+                    'id' => 'posten-standard',
+                    'name' => 'Standard Delivery',
+                    'amount' => ['value' => 9900, 'currency' => 'NOK'],
+                    'estimatedDelivery' => '2-3 days',
+                ],
+                [
+                    'id' => 'posten-express',
+                    'name' => 'Express Delivery',
+                    'amount' => ['value' => 19900, 'currency' => 'NOK'],
+                    'estimatedDelivery' => 'Next day',
+                ],
+            ],
+        ],
+    ])
+    ->profileScope('name email phoneNumber address')
+    ->create();
+```
+
+## Checkout API
 
 ### Create a Payment Session (Checkout API)
 
