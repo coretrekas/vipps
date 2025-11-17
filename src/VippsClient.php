@@ -119,6 +119,22 @@ class VippsClient
     }
 
     /**
+     * Get the client ID
+     */
+    public function getClientId(): string
+    {
+        return $this->clientId;
+    }
+
+    /**
+     * Get the client secret
+     */
+    public function getClientSecret(): string
+    {
+        return $this->clientSecret;
+    }
+
+    /**
      * Get the merchant serial number
      */
     public function getMerchantSerialNumber(): string

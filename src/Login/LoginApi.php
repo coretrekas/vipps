@@ -77,6 +77,10 @@ class LoginApi
      * Exchanges an authorization code received from the OAuth callback
      * for access and ID tokens.
      *
+     * Note: This method uses HTTP Basic Authentication (client_id:client_secret)
+     * as required by the OAuth 2.0 token endpoint, not the Bearer token used
+     * by other Vipps APIs.
+     *
      * @param string $code Authorization code from callback
      * @param string $redirectUri Redirect URI (must match the one used in authorization)
      * @param array<string, mixed> $options Additional options
@@ -109,16 +113,38 @@ class LoginApi
             $data['client_secret'] = $options['client_secret'];
         }
 
-        return $this->client->request(
-            'POST',
-            self::BASE_PATH . '/oauth2/token',
-            [
-                'form_params' => $data,
-                'headers' => [
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                ],
-            ]
-        );
+        // OAuth token exchange requires HTTP Basic Authentication, not Bearer token
+        // Use Guzzle directly to avoid the SDK's automatic Bearer token injection
+        try {
+            $response = $this->client->getHttpClient()->request(
+                'POST',
+                self::BASE_PATH . '/oauth2/token',
+                [
+                    'form_params' => $data,
+                    'auth' => [$this->client->getClientId(), $this->client->getClientSecret()],
+                    'headers' => [
+                        'Content-Type' => 'application/x-www-form-urlencoded',
+                        'Ocp-Apim-Subscription-Key' => $this->client->getSubscriptionKey(),
+                        'Merchant-Serial-Number' => $this->client->getMerchantSerialNumber(),
+                    ],
+                ]
+            );
+
+            $body = (string) $response->getBody();
+            $data = json_decode($body, true);
+
+            if (!is_array($data)) {
+                throw new VippsException('Invalid token response');
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            if ($e instanceof VippsException) {
+                throw $e;
+            }
+
+            throw new VippsException('Failed to exchange code for tokens: ' . $e->getMessage(), 0, $e);
+        }
     }
 
     /**
@@ -236,24 +262,50 @@ class LoginApi
      * Polls the token endpoint to check if the user has completed
      * authentication in the CIBA flow.
      *
+     * Note: This method uses HTTP Basic Authentication (client_id:client_secret)
+     * as required by the OAuth 2.0 token endpoint, not the Bearer token used
+     * by other Vipps APIs.
+     *
      * @param string $authReqId Authentication request ID from initiateCibaAuth
      * @return array<string, mixed> Token response or error
      * @throws VippsException
      */
     public function pollCibaToken(string $authReqId): array
     {
-        return $this->client->request(
-            'POST',
-            self::BASE_PATH . '/oauth2/token',
-            [
-                'form_params' => [
-                    'grant_type' => 'urn:openid:params:grant-type:ciba',
-                    'auth_req_id' => $authReqId,
-                ],
-                'headers' => [
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                ],
-            ]
-        );
+        // OAuth token endpoint requires HTTP Basic Authentication, not Bearer token
+        // Use Guzzle directly to avoid the SDK's automatic Bearer token injection
+        try {
+            $response = $this->client->getHttpClient()->request(
+                'POST',
+                self::BASE_PATH . '/oauth2/token',
+                [
+                    'form_params' => [
+                        'grant_type' => 'urn:openid:params:grant-type:ciba',
+                        'auth_req_id' => $authReqId,
+                    ],
+                    'auth' => [$this->client->getClientId(), $this->client->getClientSecret()],
+                    'headers' => [
+                        'Content-Type' => 'application/x-www-form-urlencoded',
+                        'Ocp-Apim-Subscription-Key' => $this->client->getSubscriptionKey(),
+                        'Merchant-Serial-Number' => $this->client->getMerchantSerialNumber(),
+                    ],
+                ]
+            );
+
+            $body = (string) $response->getBody();
+            $data = json_decode($body, true);
+
+            if (!is_array($data)) {
+                throw new VippsException('Invalid token response');
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            if ($e instanceof VippsException) {
+                throw $e;
+            }
+
+            throw new VippsException('Failed to poll CIBA token: ' . $e->getMessage(), 0, $e);
+        }
     }
 }

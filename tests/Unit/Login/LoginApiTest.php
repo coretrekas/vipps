@@ -98,8 +98,8 @@ class LoginApiTest extends TestCase
             'scope' => 'openid name email',
         ];
 
+        // Only one response needed - token exchange uses Guzzle directly with Basic Auth
         $this->mockHandler->append(
-            new Response(200, [], json_encode(['access_token' => 'test-token', 'expires_in' => 3600])),
             new Response(200, [], json_encode($expectedTokens))
         );
 
@@ -121,8 +121,8 @@ class LoginApiTest extends TestCase
             'expires_in' => 3600,
         ];
 
+        // Only one response needed - token exchange uses Guzzle directly with Basic Auth
         $this->mockHandler->append(
-            new Response(200, [], json_encode(['access_token' => 'test-token', 'expires_in' => 3600])),
             new Response(200, [], json_encode($expectedTokens))
         );
 
@@ -217,8 +217,8 @@ class LoginApiTest extends TestCase
             'expires_in' => 3600,
         ];
 
+        // Only one response needed - token polling uses Guzzle directly with Basic Auth
         $this->mockHandler->append(
-            new Response(200, [], json_encode(['access_token' => 'test-token', 'expires_in' => 3600])),
             new Response(200, [], json_encode($expectedTokens))
         );
 

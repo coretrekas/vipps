@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `getClientId()` method to VippsClient for accessing client ID
+- `getClientSecret()` method to VippsClient for accessing client secret
+
+### Fixed
+- **Critical**: Fixed OAuth token exchange authentication in Login API
+    - `exchangeCodeForTokens()` now uses HTTP Basic Authentication instead of Bearer token
+    - `pollCibaToken()` now uses HTTP Basic Authentication instead of Bearer token
+    - OAuth 2.0 token endpoints require `Authorization: Basic <base64(client_id:client_secret)>` header
+    - Previously, these methods incorrectly used `Authorization: Bearer <vipps-api-token>` header
+    - This caused Vipps to reject requests with `invalid_request` error
+    - Both methods now bypass the SDK's `request()` method and use Guzzle directly with proper Basic Auth
+
 ## [1.2.0] - 2025-11-04
 
 ### Added
@@ -104,11 +119,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Code style issues across all files
 - Import ordering (alphabetically sorted)
-
-## [Unreleased]
-
-### Planned
-- Webhook signature verification helpers
-- More comprehensive examples
-- Performance optimizations
 

@@ -1,8 +1,8 @@
 # Vipps MobilePay PHP SDK
 
-[![Latest Version](https://img.shields.io/packagist/v/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
-[![PHP Version](https://img.shields.io/packagist/php-v/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
-[![License](https://img.shields.io/packagist/l/coretrek/vipps.svg)](https://packagist.org/packages/coretrek/vipps)
+[![Latest Version](https://img.shields.io/packagist/v/coretrekas/vipps.svg)](https://packagist.org/packages/coretrekas/vipps)
+[![PHP Version](https://img.shields.io/packagist/php-v/coretrekas/vipps.svg)](https://packagist.org/packages/coretrekas/vipps)
+[![License](https://img.shields.io/packagist/l/coretrekas/vipps.svg)](https://packagist.org/packages/coretrekas/vipps)
 
 A comprehensive, production-ready PHP SDK for Vipps MobilePay APIs, providing easy integration with:
 - **ePayment API v1** - Online and in-person payments with full lifecycle management
